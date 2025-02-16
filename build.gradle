@@ -1,0 +1,70 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.2'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.asciidoctor.jvm.convert' version '3.3.2' // Asciidoctor 플러그인 추가
+}
+
+ext {
+    snippetsDir = file('build/generated-snippets') // REST Docs snippets 파일 경로
+}
+
+group = 'com.traveljournal'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    asciidoctorExt
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot 및 기타 필요한 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // 데이터베이스 및 JPA
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Spring Cloud AWS https://mvnrepository.com/artifact/io.awspring.cloud/spring-cloud-aws-starter
+    implementation group: 'io.awspring.cloud', name: 'spring-cloud-aws-starter', version: '3.3.0'
+
+    // Spring REST Docs
+    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
+    // 테스트
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+test {
+    useJUnitPlatform() // JUnit 5 사용
+    outputs.dir snippetsDir // REST Docs snippets 디렉터리 생성
+}
+
+asciidoctor {
+    inputs.dir snippetsDir // snippets 디렉토리 경로 연결
+    configurations 'asciidoctorExt'
+    dependsOn test // Tests 실행 후 Asciidoctor 빌드
+}

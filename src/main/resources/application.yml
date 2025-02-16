@@ -1,0 +1,14 @@
+spring:
+  profiles:
+    active: dev
+    include: secret
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

@@ -1,4 +1,4 @@
-name: "🚀 Feature Request"
+name: "✨ Feature Request"
 description: "새로운 기능이나 개선 사항을 제안해주세요."
 title: "[Feature] 기능 요약 제목 입력"
 labels: ["enhancement"]
@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## 🚀 기능 요청
+        ## ✨ 기능 요청
         새로운 기능이나 개선 사항을 제안해주세요.
 
   - type: textarea

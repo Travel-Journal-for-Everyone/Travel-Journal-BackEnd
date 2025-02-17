@@ -1,0 +1,43 @@
+name: "🛠 Refactoring"
+description: "코드 품질을 개선하거나 구조를 최적화하는 작업을 위한 이슈"
+title: "[Refactor] 리팩토링 요약 제목 입력"
+labels: ["refactor"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🛠 리팩토링
+        코드 개선이 필요한 부분을 설명해주세요.
+
+  - type: textarea
+    id: refactor_target
+    attributes:
+      label: "🛠 리팩토링 대상"
+      description: "개선이 필요한 코드 또는 모듈을 설명해주세요."
+      placeholder: "예: 서비스 레이어에서 비효율적인 쿼리 로직 개선"
+    validations:
+      required: true
+
+  - type: textarea
+    id: necessity
+    attributes:
+      label: "✅ 필요성"
+      description: "해당 리팩토링이 필요한 이유를 설명해주세요."
+      placeholder: "예: API 응답 속도를 개선하고 데이터 중복을 줄이기 위해 필요함"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_effect
+    attributes:
+      label: "🎯 기대 효과"
+      description: "리팩토링 후 개선될 점을 설명해주세요."
+      placeholder: "예: API 응답 시간 단축 및 코드 가독성 향상"
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "📌 추가 정보"
+      description: "관련 참고 자료나 기타 정보를 추가해주세요."
+      placeholder: "예: 관련 문서 링크"

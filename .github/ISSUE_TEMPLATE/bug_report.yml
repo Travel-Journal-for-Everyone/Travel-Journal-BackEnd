@@ -1,0 +1,62 @@
+name: "🐞 Bug Report"
+description: "버그 발생 시 문제를 설명하고 재현 방법을 공유해주세요."
+title: "[Bug] 버그 요약 제목 입력"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🫠 버그 리포트
+        버그 발생 시 아래 내용을 상세히 작성해주세요.
+
+  - type: textarea
+    id: bug_description
+    attributes:
+      label: "📚 버그 설명"
+      description: "발생한 버그를 설명해주세요."
+      placeholder: "예: 특정 페이지에서 버튼 클릭 시 화면이 깨집니다."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: "✅ 재현 방법"
+      description: "버그를 재현하는 방법을 순서대로 작성해주세요."
+      placeholder: |
+        1. 메인 페이지로 이동
+        2. 로그인 버튼 클릭
+        3. 대시보드에서 '설정' 선택
+        4. '저장' 버튼 클릭 시 오류 발생
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "🎯 예상 동작"
+      description: "정상 동작 시 기대되는 결과를 설명해주세요."
+      placeholder: "예: '저장' 버튼 클릭 후 정상적으로 설정이 반영되어야 합니다."
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: "🖥 환경 정보"
+      description: "버그가 발생한 환경을 입력해주세요."
+      placeholder: "예: macOS 14 / Chrome 119 / Spring Boot 3.1"
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "📸 스크린샷"
+      description: "가능하면 버그 발생 화면을 캡처하여 첨부해주세요."
+      placeholder: "이미지를 첨부하려면 여기로 드래그하거나 복사 후 붙여넣기하세요."
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "📌 추가 정보"
+      description: "관련 로그, 콘솔 출력 또는 기타 참고할 내용을 추가해주세요."
+      placeholder: "예: 콘솔에서 'NullPointerException' 발생"

@@ -1,0 +1,53 @@
+name: "🚀 Deployment Task"
+description: "배포 작업 및 배포 관련 이슈를 관리하는 템플릿"
+title: "[Deploy] 배포 관련 작업 제목 입력"
+labels: ["deployment"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚀 배포 관련 작업
+        배포할 버전 및 주요 변경 사항을 작성해주세요.
+
+  - type: input
+    id: deployment_version
+    attributes:
+      label: "🚀 배포 버전"
+      description: "배포할 버전을 입력해주세요."
+      placeholder: "예: v1.2.3"
+
+  - type: checkboxes
+    id: deployment_targets
+    attributes:
+      label: "✅ 배포 대상"
+      options:
+        - label: "개발 서버 (Dev)"
+        - label: "스테이징 서버 (Staging)"
+        - label: "운영 서버 (Production)"
+
+  - type: textarea
+    id: changes
+    attributes:
+      label: "🔥 주요 변경 사항"
+      description: "배포에 포함된 기능, 버그 수정, 리팩토링 등을 설명해주세요."
+      placeholder: "예: 신규 로그인 기능 추가, 이미지 업로드 속도 개선"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "📌 체크리스트"
+      options:
+        - label: "CI/CD 설정 검토 완료"
+        - label: "배포 전 테스트 완료"
+        - label: "로그 모니터링 준비 완료"
+        - label: "롤백 플랜 준비 완료"
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: "📌 추가 정보"
+      description: "배포 관련 참고 자료나 추가 사항을 작성해주세요."
+      placeholder: "예: 서버 로그 확인 경로, 배포 후 모니터링할 지표"

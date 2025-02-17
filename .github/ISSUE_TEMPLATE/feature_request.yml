@@ -1,0 +1,36 @@
+name: "🚀 Feature Request"
+description: "새로운 기능이나 개선 사항을 제안해주세요."
+title: "[Feature] 기능 요약 제목 입력"
+labels: ["enhancement"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚀 기능 요청
+        새로운 기능이나 개선 사항을 제안해주세요.
+
+  - type: textarea
+    id: feature_description
+    attributes:
+      label: "💡 기능 설명"
+      description: "추가하고 싶은 기능을 설명해주세요."
+      placeholder: "예: 사용자가 프로필 이미지를 변경할 수 있도록 지원"
+    validations:
+      required: true
+
+  - type: textarea
+    id: necessity
+    attributes:
+      label: "✅ 필요성"
+      description: "이 기능이 왜 필요한지 설명해주세요."
+      placeholder: "예: 사용자 맞춤 설정을 지원하기 위해 필요함"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_effect
+    attributes:
+      label: "🎯 기대 효과"
+      description: "기능 추가 시 예상되는 장점을 설명해주세요."
+      placeholder: "예: 사용자 경험 향상 및 개인화된 UI 제공"

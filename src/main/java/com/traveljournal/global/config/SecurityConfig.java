@@ -45,8 +45,7 @@ public class SecurityConfig {
 				.authenticationEntryPoint(new CustomAuthenticationEntryPoint())
 			)
 			.authorizeHttpRequests(requests ->
-				requests.requestMatchers("/api/auth/login").permitAll()
-					.requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**",
+				requests.requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**",
 						"/v3/api-docs/**").permitAll()
 					.anyRequest().authenticated()
 			)

@@ -55,26 +55,26 @@ public class JwtTokenProvider {
 	/**
 	 * JWT Access Token 생성
 	 */
-	public String createAccessToken(String username) {
-		return createToken(username, accessTokenExpiration);
+	public String createAccessToken(String email) {
+		return createToken(email, accessTokenExpiration);
 	}
 
 	/**
 	 * JWT Refresh Token 생성
 	 */
-	public String createRefreshToken(String username) {
-		return createToken(username, refreshTokenExpiration);
+	public String createRefreshToken(String email) {
+		return createToken(email, refreshTokenExpiration);
 	}
 
 	/**
 	 * JWT 토큰 생성 공통 로직
 	 */
-	private String createToken(String username, long expirationTime) {
+	private String createToken(String email, long expirationTime) {
 		Date now = new Date();
 		Date validity = new Date(now.getTime() + expirationTime);
 
 		return Jwts.builder()
-			.setSubject(username)
+			.setSubject(email)
 			.setIssuedAt(now)
 			.setExpiration(validity)
 			.signWith(secretKey)
@@ -82,9 +82,9 @@ public class JwtTokenProvider {
 	}
 
 	/**
-	 * JWT 토큰에서 username 추출
+	 * JWT 토큰에서 email 추출
 	 */
-	public String getUsername(String token) {
+	public String getEmail(String token) {
 		return parseClaims(token).getBody().getSubject();
 	}
 
@@ -127,10 +127,10 @@ public class JwtTokenProvider {
 	 * 인증 객체를 SecurityContext에 저장
 	 */
 	public void setAuthentication(String token) {
-		String username = getUsername(token);
+		String email = getEmail(token);
 
 		// userDetailsService를 통해 UserDetails 로드
-		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 		Authentication authentication =
 			new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		SecurityContextHolder.getContext().setAuthentication(authentication);

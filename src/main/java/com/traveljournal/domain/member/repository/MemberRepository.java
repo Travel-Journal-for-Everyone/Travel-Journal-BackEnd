@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.traveljournal.domain.member.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
-	Optional<Member> findBySocialLoginId(String socialLoginId);
+	Optional<Member> findByEmail(String email);
 }

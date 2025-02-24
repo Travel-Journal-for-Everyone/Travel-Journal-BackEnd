@@ -30,7 +30,7 @@ public class Member implements UserDetails {
 	private Long id;
 
 	@Column(nullable = false, unique = true, length = 255)
-	private String socialLoginId;
+	private String email;
 
 	@Column(nullable = false, length = 50)
 	private String nickname;
@@ -78,7 +78,7 @@ public class Member implements UserDetails {
 
 	@Override
 	public String getUsername() {
-		return this.socialLoginId; // socialLoginId를 username으로 사용
+		return this.email; // socialLoginId를 username으로 사용
 	}
 
 	@Override

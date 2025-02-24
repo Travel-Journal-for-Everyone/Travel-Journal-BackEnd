@@ -17,8 +17,8 @@ public class MemberService {
 	private final MemberRepository memberRepository;
 
 	@Transactional(readOnly = true)
-	public Optional<Member> findBySocialLoginId(String socialLoginId) {
-		return memberRepository.findBySocialLoginId(socialLoginId);
+	public Optional<Member> findByEmail(String email) {
+		return memberRepository.findByEmail(email);
 	}
 }
 

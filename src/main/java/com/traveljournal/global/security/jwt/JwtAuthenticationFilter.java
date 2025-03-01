@@ -3,6 +3,7 @@ package com.traveljournal.global.security.jwt;
 import java.io.IOException;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.traveljournal.global.data.JwtValidateStatus;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtTokenProvider jwtTokenProvider;

@@ -8,4 +8,5 @@ import com.traveljournal.domain.member.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 	Optional<Member> findByEmail(String email);
+
 }

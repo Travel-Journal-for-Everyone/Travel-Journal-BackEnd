@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.traveljournal.domain.member.dto.MemberTokenResponse;
+import com.traveljournal.domain.member.dto.ReissueRequest;
 import com.traveljournal.domain.member.dto.TokenInfo;
-import com.traveljournal.domain.member.dto.TokenRefreshRequest;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.entity.Token;
 import com.traveljournal.domain.member.repository.TokenRepository;
@@ -33,11 +33,9 @@ public class TokenService {
 	 */
 	public TokenInfo createTokens(String email, String deviceId) {
 		// 장치 ID가 없으면 생성
-		log.info("deviceId: " + deviceId);
 		if (deviceId == null || deviceId.isBlank()) {
 			deviceId = UUID.randomUUID().toString();
 		}
-		log.info("deviceId: " + deviceId);
 		String accessToken = jwtTokenProvider.createAccessToken(email);
 		String refreshToken = jwtTokenProvider.createRefreshToken(email);
 		return TokenInfo.of(accessToken, refreshToken, deviceId);
@@ -92,7 +90,7 @@ public class TokenService {
 	 * 4. 새 액세스 토큰 발급
 	 */
 	@Transactional
-	public MemberTokenResponse refreshToken(TokenRefreshRequest request) {
+	public MemberTokenResponse refreshToken(ReissueRequest request) {
 		// 리프레시 토큰 검증
 		JwtValidateStatus status = jwtTokenProvider.getTokenValidationStatus(request.refreshToken());
 		if (status != JwtValidateStatus.ACCEPTED) {

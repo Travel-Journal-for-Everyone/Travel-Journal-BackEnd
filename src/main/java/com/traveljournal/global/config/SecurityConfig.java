@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -47,7 +48,8 @@ public class SecurityConfig {
 			.authorizeHttpRequests(requests ->
 				requests.requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**",
 						"/v3/api-docs/**").permitAll()
-					.requestMatchers("/auth/kakao/**", "/auth/login", "/auth/signup").permitAll()
+					.requestMatchers(HttpMethod.GET,"/v1/auth/kakao/callback").permitAll()
+					.requestMatchers(HttpMethod.POST, "/v1/tokens/reissue").permitAll()
 					.anyRequest().authenticated()
 			)
 			.sessionManagement(sessionManagement ->

@@ -7,13 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.traveljournal.domain.member.dto.MemberTokenResponse;
-import com.traveljournal.domain.member.dto.TokenRefreshRequest;
+import com.traveljournal.domain.member.dto.ReissueRequest;
+import com.traveljournal.domain.member.dto.ReissueResonse;
 import com.traveljournal.domain.member.service.TokenService;
 import com.traveljournal.global.data.ApiResponse;
-import com.traveljournal.global.data.ApiResult;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -31,12 +30,11 @@ public class TokenController {
 	 */
 	@Operation(
 		summary = "Token Refresh",
-		description = "Refresh 토큰과 장치 ID를 사용하여 새로운 액세스 토큰을 발급합니다.",
-		security = @SecurityRequirement(name = "bearer-key")
+		description = "Refresh 토큰과 장치 ID를 사용하여 새로운 액세스 토큰을 발급합니다."
 	)
 	@PostMapping("/reissue")
-	public ResponseEntity<ApiResult<MemberTokenResponse>> refreshToken(@RequestBody TokenRefreshRequest request) {
-		MemberTokenResponse response = tokenService.refreshToken(request);
-		return ApiResponse.ok(response);
+	public ResponseEntity<ReissueResonse> refreshToken(@RequestBody ReissueRequest Reissuerequest) {
+		MemberTokenResponse memberTokenResponse = tokenService.refreshToken(Reissuerequest);
+		return ApiResponse.accessTokenResponse(ReissueResonse.of(memberTokenResponse), memberTokenResponse.tokenInfo().accessToken());
 	}
 }

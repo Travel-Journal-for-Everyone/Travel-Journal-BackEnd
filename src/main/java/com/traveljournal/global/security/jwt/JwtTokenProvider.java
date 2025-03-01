@@ -138,10 +138,17 @@ public class JwtTokenProvider {
 	 * 요청 헤더에서 JWT 토큰 추출
 	 */
 	public String resolveToken(String bearerToken) {
-		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+		validateAuthorizationHeader(bearerToken);
+		if (bearerToken.startsWith("Bearer ")) {
 			return bearerToken.substring(7);
 		}
 		return null;
+	}
+
+	private void validateAuthorizationHeader(String authorizationHeader) {
+		if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+			throw new IllegalArgumentException("유효한 Authorization 헤더가 필요합니다.");
+		}
 	}
 
 	/**

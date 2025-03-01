@@ -5,5 +5,11 @@ spring:
     password: ${secret.dev-password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+oauth:
+  kakao:
+    redirect-uri: http://localhost:8080/auth/kakao/callback
+    token-uri: https://kauth.kakao.com/oauth/token
+    user-info-uri: https://kapi.kakao.com/v2/user/me
+
 springdoc:
   request-url: ${secret.dev-request-url}

@@ -1,11 +1,6 @@
 package com.traveljournal.domain.member.entity;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
-
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,8 +9,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,8 +20,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "member")
-public class Member implements UserDetails {
-
+public class Member {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -59,45 +55,45 @@ public class Member implements UserDetails {
 
 	private Boolean isFirstLogin = true;
 
-	public void updateNickname(String nickname) {
+	@PrePersist
+	public void prePersist() {
+		this.createAt = LocalDateTime.now();
+	}
+
+	@Builder
+	public Member(String email, String nickname, String profileImageUrl, LocalDateTime birthdate,
+		AccountScope accountScope, String phoneNumber, SocialProvider socialProvider) {
+		this.email = email;
 		this.nickname = nickname;
+		this.profileImageUrl = profileImageUrl;
+		this.birthdate = birthdate;
+		this.accountScope = accountScope != null ? accountScope : AccountScope.PUBLIC;
+		this.phoneNumber = phoneNumber;
+		this.socialProvider = socialProvider;
+		this.isDeleted = false;
+		this.isFirstLogin = true;
+	}
+
+	// 첫 로그인 상태 변경
+	public void completeFirstLogin(String nickname, AccountScope accountScope) {
 		this.isFirstLogin = false;
+		this.nickname = nickname;
+		this.accountScope = accountScope;
 	}
 
-	// UserDetails 메서드 구현
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return Collections.singletonList(() -> "ROLE_USER");
+	// 회원 정보 업데이트
+	public void updateProfile(String nickname, String profileImageUrl,
+		LocalDateTime birthdate, AccountScope accountScope,
+		String phoneNumber) {
+		this.nickname = nickname;
+		this.profileImageUrl = profileImageUrl;
+		this.birthdate = birthdate;
+		this.accountScope = accountScope;
+		this.phoneNumber = phoneNumber;
 	}
 
-	@Override
-	public String getPassword() {
-		// Member 클래스에 비밀번호 필드가 없는 경우 아래를 수정해야 함
-		return null; // 필드가 없다면 null, 아니면 password 필드 추가 및 반환
-	}
-
-	@Override
-	public String getUsername() {
-		return this.email; // socialLoginId를 username으로 사용
-	}
-
-	@Override
-	public boolean isAccountNonExpired() {
-		return true; // 계정 만료 여부 (true = 만료되지 않음)
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-		return true; // 계정 잠금 여부 (true = 잠금되지 않음)
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return true; // 자격 증명 만료 여부 (true = 만료되지 않음)
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !isDeleted; // 계정 활성화 여부 (삭제된 계정은 비활성화)
+	// 회원 삭제 (soft delete)
+	public void delete() {
+		this.isDeleted = true;
 	}
 }

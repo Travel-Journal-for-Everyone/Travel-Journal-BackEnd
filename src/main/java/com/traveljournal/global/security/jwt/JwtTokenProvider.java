@@ -9,23 +9,20 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import com.traveljournal.global.config.AppConfig;
+import com.traveljournal.global.data.JwtValidateStatus;
+import com.traveljournal.global.security.service.CustomUserDetailsService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-/**
- * JWT 토큰을 관리하는 클래스
- * - 토큰 생성, 검증, 파싱 기능을 수행한다.
- */
 
 /**
  * JWT 토큰을 관리하는 클래스
@@ -34,10 +31,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
-	private final SecretKey secretKey;
-	private final UserDetailsService userDetailsService;
+	private final AppConfig appConfig;
+	private final CustomUserDetailsService userDetailsService;
+
+	private SecretKey secretKey;
 
 	@Value("${jwt.access-token-expiration}")
 	private long accessTokenExpiration; // Access Token 유효 기간
@@ -45,11 +45,9 @@ public class JwtTokenProvider {
 	@Value("${jwt.refresh-token-expiration}")
 	private long refreshTokenExpiration; // Refresh Token 유효 기간
 
-	public JwtTokenProvider(AppConfig appConfig, UserDetailsService userDetailsService) {
-		// Base64로 디코딩한 secretKey를 생성
-		this.secretKey = Keys.hmacShaKeyFor(appConfig.getSecretKey()); // 추가 디코딩 제거
-
-		this.userDetailsService = userDetailsService;
+	@PostConstruct
+	public void init() {
+		this.secretKey = Keys.hmacShaKeyFor(appConfig.getSecretKey());
 	}
 
 	/**
@@ -82,35 +80,58 @@ public class JwtTokenProvider {
 	}
 
 	/**
-	 * JWT 토큰에서 email 추출
+	 * JWT 토큰에서 이메일 추출
 	 */
 	public String getEmail(String token) {
-		return parseClaims(token).getBody().getSubject();
+		try {
+			return Jwts.parserBuilder()
+				.setSigningKey(secretKey)
+				.build()
+				.parseClaimsJws(token)
+				.getBody()
+				.getSubject();
+		} catch (ExpiredJwtException e) {
+			// 만료된 토큰이라도 이메일은 추출
+			return e.getClaims().getSubject();
+		}
 	}
 
 	/**
-	 * JWT 토큰 검증
+	 * 토큰 검증을 위한 메서드
+	 * @param token 접근 토큰 혹은 갱신 토큰
+	 * @return JwtValidateStatus
+	 *  ACCEPTED 검증 완료
+	 *  EXPIRED 만료
+	 *  DENIED 검증 실패
 	 */
-	public boolean validateToken(String token) {
+	public JwtValidateStatus getTokenValidationStatus(String token) {
 		try {
-			parseClaims(token);
-			return true;
+			Jwts.parserBuilder()
+				.setSigningKey(secretKey)
+				.build()
+				.parseClaimsJws(token);
+			return JwtValidateStatus.ACCEPTED;
 		} catch (ExpiredJwtException e) {
-			log.warn("Expired JWT Token: {}", e.getMessage());
+			return JwtValidateStatus.EXPIRED;
 		} catch (JwtException e) {
-			log.warn("Invalid JWT Token: {}", e.getMessage());
+			return JwtValidateStatus.DENIED;
 		}
-		return false;
 	}
 
 	/**
 	 * JWT 토큰에서 Claims 추출
 	 */
-	private Jws<Claims> parseClaims(String token) {
-		return Jwts.parserBuilder()
-			.setSigningKey(secretKey)
-			.build()
-			.parseClaimsJws(token);
+	public Claims getClaims(String token) {
+		try {
+			return Jwts.parserBuilder()
+				.setSigningKey(secretKey)
+				.build()
+				.parseClaimsJws(token)
+				.getBody();
+		} catch (ExpiredJwtException e) {
+			// 만료된 토큰이라도 Claims 반환
+			return e.getClaims();
+		}
 	}
 
 	/**
@@ -128,12 +149,11 @@ public class JwtTokenProvider {
 	 */
 	public void setAuthentication(String token) {
 		String email = getEmail(token);
-
-		// userDetailsService를 통해 UserDetails 로드
 		UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-		Authentication authentication =
-			new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(
+			userDetails, null, userDetails.getAuthorities());
+
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
-
 }

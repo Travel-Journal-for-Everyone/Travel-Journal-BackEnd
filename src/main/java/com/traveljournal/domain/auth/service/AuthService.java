@@ -3,7 +3,6 @@ package com.traveljournal.domain.auth.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.traveljournal.domain.auth.dto.KakaoCodeRequest;
 import com.traveljournal.domain.auth.dto.KakaoIdTokenInfo;
 import com.traveljournal.domain.auth.dto.KakaoMemberInfo;
 import com.traveljournal.domain.auth.dto.KakaoTokenResponse;
@@ -36,27 +35,27 @@ public class AuthService {
 	 * 5. 로그인 응답 생성
 	 */
 	@Transactional
-	public LoginCombinedResponse processKakaoLoginWithCode(KakaoCodeRequest request, String deviceId) {
+	public LoginCombinedResponse processKakaoLoginWithCode(String code, String deviceId) {
 
 		// 카카오 토큰 획득
-		KakaoTokenResponse kakaoToken = kakaoClient.getKakaoToken(request.code());
+		KakaoTokenResponse kakaoTokenResponse = kakaoClient.getKakaoToken(code);
 
-		return processKakaoLoginWithIdToken(kakaoToken.id_token(), deviceId);
+		return processKakaoLoginWithIdToken(kakaoTokenResponse.id_token(), deviceId);
 	}
 
 	@Transactional
 	public LoginCombinedResponse processKakaoLoginWithIdToken(String idToken, String deviceId) {
 
 		// ID Token으로 카카오 사용자 정보 가져오기
-		KakaoIdTokenInfo memberInfo = kakaoClient.getKakaoMemberInfoFromIdToken(idToken);
+		KakaoIdTokenInfo kakaoIdTokenInfo = kakaoClient.getKakaoMemberInfoFromIdToken(idToken);
 
 		// 회원 찾기 또는 생성
 		Member member = memberService.findOrCreateMember(
 			KakaoMemberInfo.of(
-				Long.parseLong(memberInfo.sub()),
-				memberInfo.email(),
-				memberInfo.nickname(),
-				memberInfo.profile_image_url()
+				Long.parseLong(kakaoIdTokenInfo.sub()),
+				kakaoIdTokenInfo.email(),
+				kakaoIdTokenInfo.nickname(),
+				kakaoIdTokenInfo.profile_image_url()
 			)
 		);
 

@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.traveljournal.domain.auth.dto.KakaoCodeRequest;
 import com.traveljournal.domain.auth.dto.LoginCombinedResponse;
 import com.traveljournal.domain.auth.dto.LoginResponse;
 import com.traveljournal.domain.auth.service.AuthService;
 import com.traveljournal.global.data.ApiResponse;
+import com.traveljournal.global.security.jwt.JwtTokenProvider;
 import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 
 	private final AuthService authService;
+	private final JwtTokenProvider jwtTokenProvider;
 
 	/**
 	 * 카카오 로그인 콜백 처리
@@ -46,8 +47,8 @@ public class AuthController {
 		@Parameter(description = "디바이스 ID (선택 사항)")
 		@RequestParam(required = false) String deviceId) {
 
-		LoginCombinedResponse response = authService.processKakaoLoginWithCode(new KakaoCodeRequest(code), deviceId);
-		return ApiResponse.accessTokenResponse(response.LoginResponse(), response.accessToken());
+		LoginCombinedResponse loginCombinedResponse = authService.processKakaoLoginWithCode(code, deviceId);
+		return ApiResponse.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
 	}
 
 	@Operation(
@@ -60,15 +61,13 @@ public class AuthController {
 		@RequestHeader("Authorization") String authorizationHeader,
 		@RequestParam(required = false) String deviceId
 	) {
-		if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-			throw new IllegalArgumentException("유효한 Authorization 헤더가 필요합니다.");
-		}
-		String idToken = authorizationHeader.substring(7);
+		String idToken = jwtTokenProvider.resolveToken(authorizationHeader);
 
-		LoginCombinedResponse response = authService.processKakaoLoginWithIdToken(idToken, deviceId);
+		LoginCombinedResponse loginCombinedResponse = authService.processKakaoLoginWithIdToken(idToken, deviceId);
 
-		return ApiResponse.accessTokenResponse(response.LoginResponse(), response.accessToken());
+		return ApiResponse.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
 	}
+
 
 	/**
 	 * 로그아웃 처리

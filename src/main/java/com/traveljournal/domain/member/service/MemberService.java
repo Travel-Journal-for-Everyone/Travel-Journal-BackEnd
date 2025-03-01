@@ -42,8 +42,8 @@ public class MemberService {
 	 * 카카오 회원정보를 바탕으로 회원 조회 또는 생성
 	 */
 	@Transactional
-	public Member findOrCreateMember(KakaoMemberInfo memberInfo) {
-		String email = memberInfo.kakao_account().email();
+	public Member findOrCreateMember(KakaoMemberInfo kakaoMemberInfo) {
+		String email = kakaoMemberInfo.kakao_account().email();
 
 		// 이메일로 회원 조회
 		Optional<Member> existingMember = memberRepository.findByEmail(email);
@@ -56,8 +56,8 @@ public class MemberService {
 		// 새 회원 생성
 		Member newMember = Member.builder()
 			.email(email)
-			.nickname(memberInfo.kakao_account().profile().nickname())
-			.profileImageUrl(memberInfo.kakao_account().profile().profile_image_url())
+			.nickname(kakaoMemberInfo.kakao_account().profile().nickname())
+			.profileImageUrl(kakaoMemberInfo.kakao_account().profile().profile_image_url())
 			.accountScope(AccountScope.PUBLIC)
 			.socialProvider(SocialProvider.KAKAO)
 			.build();
@@ -69,9 +69,9 @@ public class MemberService {
 	 * 첫 로그인 완료 처리
 	 */
 	@Transactional
-	public void completeFirstLogin(Long memberId, FirstLoginRequest request) {
+	public void completeFirstLogin(Long memberId, FirstLoginRequest firstLoginRequest) {
 		Member member = findById(memberId);
-		member.completeFirstLogin(request.nickname(), request.accountScope());
+		member.completeFirstLogin(firstLoginRequest.nickname(), firstLoginRequest.accountScope());
 	}
 
 	/**

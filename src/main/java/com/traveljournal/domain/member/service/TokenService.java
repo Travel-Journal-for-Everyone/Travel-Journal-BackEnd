@@ -90,16 +90,16 @@ public class TokenService {
 	 * 4. 새 액세스 토큰 발급
 	 */
 	@Transactional
-	public MemberTokenResponse refreshToken(ReissueRequest request) {
+	public MemberTokenResponse refreshToken(ReissueRequest reissueRequest) {
 		// 리프레시 토큰 검증
-		JwtValidateStatus status = jwtTokenProvider.getTokenValidationStatus(request.refreshToken());
+		JwtValidateStatus status = jwtTokenProvider.getTokenValidationStatus(reissueRequest.refreshToken());
 		if (status != JwtValidateStatus.ACCEPTED) {
 			throw new UnauthorizedException("리프레시 토큰이 유효하지 않습니다.");
 		}
 
 		// 장치 ID로 토큰 정보 조회
-		String deviceId = request.deviceId();
-		String email = jwtTokenProvider.getEmail(request.refreshToken());
+		String deviceId = reissueRequest.deviceId();
+		String email = jwtTokenProvider.getEmail(reissueRequest.refreshToken());
 		Member member = memberService.findByEmail(email)
 			.orElseThrow(() -> new UnauthorizedException("존재하지 않는 회원입니다."));
 
@@ -108,7 +108,7 @@ public class TokenService {
 			.orElseThrow(() -> new UnauthorizedException("토큰 정보가 존재하지 않습니다."));
 
 		// 토큰 비교
-		if (!savedRefreshToken.equals(request.refreshToken())) {
+		if (!savedRefreshToken.equals(reissueRequest.refreshToken())) {
 			throw new UnauthorizedException("리프레시 토큰이 일치하지 않습니다.");
 		}
 
@@ -121,7 +121,7 @@ public class TokenService {
 			.tokenInfo(
 				TokenInfo.builder()
 					.accessToken(newAccessToken)
-					.refreshToken(request.refreshToken())
+					.refreshToken(reissueRequest.refreshToken())
 					.deviceId(deviceId)
 					.build()
 			)

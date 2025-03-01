@@ -35,12 +35,10 @@ public class MemberController {
 		security = @SecurityRequirement(name = "bearer-key")
 	)
 	@PostMapping("/complete-first-login")
-	public ResponseEntity<?> completeFirstLogin(@RequestBody FirstLoginRequest request) {
-		log.info(request.toString());
+	public ResponseEntity<?> completeFirstLogin(@RequestBody FirstLoginRequest firstLoginRequest) {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
-
-		memberService.completeFirstLogin(memberId, request);
+		memberService.completeFirstLogin(memberId, firstLoginRequest);
 		return ApiResponse.success("첫 로그인 완료 처리되었습니다.");
 	}
 }

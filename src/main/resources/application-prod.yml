@@ -1,15 +1,13 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/traveljournal_db
+    url: jdbc:mysql://mysql:3306/traveljournal_db
     username: app_user
     password: ${secret.prod-password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 oauth:
   kakao:
-    redirect-uri: http://localhost:8080/auth/kakao/callback
-    token-uri: https://kauth.kakao.com/oauth/token
-    user-info-uri: https://kapi.kakao.com/v2/user/me
+    redirect-uri: ${oauth.kakao.prod-redirect-uri}
 
 springdoc:
   request-url: ${secret.prod-request-url}

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.traveljournal.domain.member.dto.MemberTokenResponse;
 import com.traveljournal.domain.member.dto.ReissueRequest;
-import com.traveljournal.domain.member.dto.ReissueResonse;
+import com.traveljournal.domain.member.dto.ReissueResponse;
 import com.traveljournal.domain.member.service.TokenService;
 import com.traveljournal.global.data.ApiResponse;
 
@@ -33,8 +33,8 @@ public class TokenController {
 		description = "Refresh 토큰과 장치 ID를 사용하여 새로운 액세스 토큰을 발급합니다."
 	)
 	@PostMapping("/reissue")
-	public ResponseEntity<ReissueResonse> refreshToken(@RequestBody ReissueRequest Reissuerequest) {
+	public ResponseEntity<ReissueResponse> refreshToken(@RequestBody ReissueRequest Reissuerequest) {
 		MemberTokenResponse memberTokenResponse = tokenService.refreshToken(Reissuerequest);
-		return ApiResponse.accessTokenResponse(ReissueResonse.of(memberTokenResponse), memberTokenResponse.tokenInfo().accessToken());
+		return ApiResponse.accessTokenResponse(ReissueResponse.of(memberTokenResponse), memberTokenResponse.tokenInfo().accessToken());
 	}
 }

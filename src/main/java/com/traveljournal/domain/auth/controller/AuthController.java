@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.traveljournal.domain.auth.dto.LoginCombinedResponse;
 import com.traveljournal.domain.auth.dto.LoginResponse;
 import com.traveljournal.domain.auth.service.AuthService;
+import com.traveljournal.domain.auth.util.EnumUtils;
 import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.global.data.ApiResponse;
-import com.traveljournal.global.security.jwt.JwtTokenProvider;
 import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 
 	private final AuthService authService;
-	private final JwtTokenProvider jwtTokenProvider;
 
 	/**
 	 * 로그인 콜백 처리
@@ -51,9 +50,11 @@ public class AuthController {
 		@RequestParam(required = false) String deviceId,
 
 		@Parameter(description = "소셜로그인 제공자")
-		@PathVariable SocialProvider socialProvider
+		@PathVariable String socialProvider
 	) {
-		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithCode(socialProvider,code, deviceId);
+		SocialProvider socialProviderEnum = EnumUtils.toSocialProvider(socialProvider);
+
+		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithCode(socialProviderEnum,code, deviceId);
 
 		return ApiResponse.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
 	}
@@ -70,10 +71,12 @@ public class AuthController {
 		@Parameter(description = "디바이스 ID (선택 사항)")
 		@RequestParam(required = false) String deviceId,
 
-		@Parameter(description = "소셜로그인 제공자")
-		@PathVariable SocialProvider socialProvider
+		@Parameter(description = "소셜로그인 제공자", example = "kakao, google, apple 셋 중 하나")
+		@PathVariable String socialProvider
 	) {
-		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(socialProvider, authorizationHeader, deviceId);
+		SocialProvider socialProviderEnum = EnumUtils.toSocialProvider(socialProvider);
+
+		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(socialProviderEnum, authorizationHeader, deviceId);
 
 		return ApiResponse.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
 	}
@@ -88,7 +91,9 @@ public class AuthController {
 		security = @SecurityRequirement(name = "bearer-key")
 	)
 	@PostMapping("/logout")
-	public ResponseEntity<?> logout(@RequestParam String deviceId) {
+	public ResponseEntity<?> logout(
+		@Parameter(description = "로그아웃 할 member의 device_id를 입력해주세요.")
+		@RequestParam String deviceId) {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
 		authService.logout(memberId, deviceId);

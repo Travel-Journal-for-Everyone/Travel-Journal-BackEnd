@@ -1,5 +1,6 @@
 package com.traveljournal.domain.member.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -34,7 +35,7 @@ public class Member {
 	@Column(length = 255)
 	private String profileImageUrl;
 
-	private LocalDateTime birthdate;
+	private LocalDate birthdate;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -61,7 +62,7 @@ public class Member {
 	}
 
 	@Builder
-	public Member(String email, String nickname, String profileImageUrl, LocalDateTime birthdate,
+	public Member(String email, String nickname, String profileImageUrl, LocalDate birthdate,
 		AccountScope accountScope, String phoneNumber, SocialProvider socialProvider) {
 		this.email = email;
 		this.nickname = nickname;
@@ -83,7 +84,7 @@ public class Member {
 
 	// 회원 정보 업데이트
 	public void updateProfile(String nickname, String profileImageUrl,
-		LocalDateTime birthdate, AccountScope accountScope,
+		LocalDate birthdate, AccountScope accountScope,
 		String phoneNumber) {
 		this.nickname = nickname;
 		this.profileImageUrl = profileImageUrl;

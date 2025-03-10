@@ -89,6 +89,7 @@ public class MemberService {
 		return member;
 	}
 
+	@Transactional(readOnly = true)
 	public boolean isDuplicate(String nickname) {
 		return memberRepository.findByNickname(nickname) != null;
 	}

@@ -45,6 +45,15 @@ public class MemberController {
 	}
 
 	@GetMapping("/check-nickname/{nickname}")
+	@Operation(
+		summary = "Nickname Check",
+		description = """
+			닉네임 중복체크 기능입니다.
+			<br> 중복 닉네임 : 상태코드 409 / duplicate
+			<br> 비속어 닉네임 : 상태코드 409 / containsBadWord
+			<br> 사용가능한 닉네임 : 상태코드 200 / valid""",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
 	public ResponseEntity<?> checkNickname(@PathVariable("nickname") String nickname) {
 		// if (memberService.isProfane(nickname)) {
 		// 	return ApiResponse.onFailure("containsBadWord");

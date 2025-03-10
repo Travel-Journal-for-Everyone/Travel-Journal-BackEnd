@@ -3,16 +3,10 @@ package com.traveljournal.domain.auth.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.traveljournal.domain.auth.dto.KakaoIdTokenInfo;
-import com.traveljournal.domain.auth.dto.KakaoMemberInfo;
-import com.traveljournal.domain.auth.dto.KakaoTokenResponse;
 import com.traveljournal.domain.auth.dto.LoginCombinedResponse;
-import com.traveljournal.domain.auth.dto.LoginResponse;
-import com.traveljournal.domain.auth.util.KakaoClient;
-import com.traveljournal.domain.member.dto.TokenInfo;
-import com.traveljournal.domain.member.entity.Member;
-import com.traveljournal.domain.member.service.MemberService;
+import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.service.TokenService;
+import com.traveljournal.global.security.jwt.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,51 +16,30 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthService {
 
-	private final KakaoClient kakaoClient;
-	private final MemberService memberService;
 	private final TokenService tokenService;
+	private final KakaoService kakaoService;
+	private final JwtTokenProvider jwtTokenProvider;
 
-	/**
-	 * 카카오 로그인 처리
-	 * 1. 카카오 인증 코드로 액세스 토큰 요청
-	 * 2. 카카오 액세스 토큰으로 사용자 정보 요청
-	 * 3. 이메일로 회원 조회 또는 생성
-	 * 4. JWT 토큰 생성 및 저장
-	 * 5. 로그인 응답 생성
-	 */
 	@Transactional
-	public LoginCombinedResponse processKakaoLoginWithCode(String code, String deviceId) {
-
-		// 카카오 토큰 획득
-		KakaoTokenResponse kakaoTokenResponse = kakaoClient.getKakaoToken(code);
-
-		return processKakaoLoginWithIdToken(kakaoTokenResponse.id_token(), deviceId);
+	public LoginCombinedResponse handleLoginWithCode(SocialProvider socialProvider, String code, String deviceId) {
+		switch (socialProvider) {
+			case KAKAO:
+				return kakaoService.processKakaoLoginWithCode(code, deviceId, socialProvider);
+			default:
+				throw new UnsupportedOperationException("지원되지 않는 소셜 로그인 제공자입니다.");
+		}
 	}
 
 	@Transactional
-	public LoginCombinedResponse processKakaoLoginWithIdToken(String idToken, String deviceId) {
+	public LoginCombinedResponse handleLoginWithIdToken(SocialProvider socialProvider, String authorizationHeader, String deviceId) {
+		String idToken = jwtTokenProvider.resolveToken(authorizationHeader);
 
-		// ID Token으로 카카오 사용자 정보 가져오기
-		KakaoIdTokenInfo kakaoIdTokenInfo = kakaoClient.getKakaoMemberInfoFromIdToken(idToken);
-
-		// 회원 찾기 또는 생성
-		Member member = memberService.findOrCreateMember(
-			KakaoMemberInfo.of(
-				Long.parseLong(kakaoIdTokenInfo.sub()),
-				kakaoIdTokenInfo.email(),
-				kakaoIdTokenInfo.nickname(),
-				kakaoIdTokenInfo.profile_image_url()
-			)
-		);
-
-		// JWT 토큰 생성
-		TokenInfo tokenInfo = tokenService.createTokens(member.getEmail(), deviceId);
-
-		// 토큰 저장
-		tokenService.saveOrUpdateToken(member, tokenInfo.deviceId(), tokenInfo.refreshToken());
-
-		// 회원 정보와 토큰 정보를 포함한 응답 생성
-		return LoginCombinedResponse.of(LoginResponse.from(member, tokenInfo), tokenInfo.accessToken());
+		switch (socialProvider) {
+			case KAKAO:
+				return kakaoService.processKakaoLoginWithIdToken(idToken, deviceId, socialProvider);
+			default:
+				throw new UnsupportedOperationException("지원되지 않는 소셜 로그인 제공자입니다.");
+		}
 	}
 
 	/**
@@ -77,4 +50,6 @@ public class AuthService {
 	public void logout(Long memberId, String deviceId) {
 		tokenService.deleteToken(memberId, deviceId);
 	}
+
+
 }

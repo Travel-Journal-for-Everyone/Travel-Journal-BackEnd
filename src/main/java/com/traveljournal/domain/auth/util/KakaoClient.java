@@ -2,7 +2,6 @@ package com.traveljournal.domain.auth.util;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -12,7 +11,6 @@ import org.springframework.web.client.RestTemplate;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.traveljournal.domain.auth.dto.KakaoIdTokenInfo;
-import com.traveljournal.domain.auth.dto.KakaoMemberInfo;
 import com.traveljournal.domain.auth.dto.KakaoTokenResponse;
 import com.traveljournal.global.config.KakaoOAuthConfig;
 import com.traveljournal.global.exception.ExternalApiException;
@@ -61,37 +59,6 @@ public class KakaoClient {
 		} catch (Exception e) {
 			log.error("카카오 토큰 발급 실패: {}", e.getMessage());
 			throw new ExternalApiException("카카오 토큰 발급에 실패했습니다: " + e.getMessage());
-		}
-	}
-
-	/**
-	 * 카카오 액세스 토큰으로 사용자 정보 가져오기
-	 */
-	public KakaoMemberInfo getKakaoMemberInfo(String accessToken) {
-		try {
-			HttpHeaders headers = new HttpHeaders();
-			headers.set("Authorization", "Bearer " + accessToken);
-			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-			HttpEntity<Void> request = new HttpEntity<>(headers);
-
-			KakaoMemberInfo response = restTemplate.exchange(
-				kakaoOAuthConfig.getUserInfoUri(),
-				HttpMethod.GET,
-				request,
-				KakaoMemberInfo.class
-			).getBody();
-
-			if (response == null) {
-				throw new ExternalApiException("카카오 사용자 정보 응답이 null입니다.");
-			}
-
-			log.info("카카오 사용자 정보 조회 성공");
-			return response;
-
-		} catch (Exception e) {
-			log.error("카카오 사용자 정보 조회 실패: {}", e.getMessage());
-			throw new ExternalApiException("카카오 사용자 정보 조회에 실패했습니다: " + e.getMessage());
 		}
 	}
 

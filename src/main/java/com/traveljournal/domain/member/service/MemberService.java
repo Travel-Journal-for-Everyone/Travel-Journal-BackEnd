@@ -42,27 +42,28 @@ public class MemberService {
 	 * 카카오 회원정보를 바탕으로 회원 조회 또는 생성
 	 */
 	@Transactional
-	public Member findOrCreateMember(KakaoMemberInfo kakaoMemberInfo) {
+	public Member findOrCreateMember(KakaoMemberInfo kakaoMemberInfo, SocialProvider socialProvider) {
 		String email = kakaoMemberInfo.kakao_account().email();
 
-		// 이메일로 회원 조회
-		Optional<Member> existingMember = memberRepository.findByEmail(email);
+		Optional<Member> existingMember = findByEmail(email);
 
-		// 기존 회원이 있으면 반환
 		if (existingMember.isPresent()) {
 			return existingMember.get();
 		}
 
-		// 새 회원 생성
-		Member newMember = Member.builder()
-			.email(email)
+		Member newMember = createNewMember(kakaoMemberInfo, socialProvider);
+
+		return memberRepository.save(newMember);
+	}
+
+	public Member createNewMember(KakaoMemberInfo kakaoMemberInfo, SocialProvider socialProvider) {
+		return Member.builder()
+			.email(kakaoMemberInfo.kakao_account().email())
 			.nickname(kakaoMemberInfo.kakao_account().profile().nickname())
 			.profileImageUrl(kakaoMemberInfo.kakao_account().profile().profile_image_url())
 			.accountScope(AccountScope.PUBLIC)
-			.socialProvider(SocialProvider.KAKAO)
+			.socialProvider(socialProvider)
 			.build();
-
-		return memberRepository.save(newMember);
 	}
 
 	/**
@@ -79,7 +80,7 @@ public class MemberService {
 	 */
 	@Transactional
 	public Member updateProfile(Long memberId, String nickname, String profileImageUrl,
-		java.time.LocalDateTime birthdate, AccountScope accountScope,
+		java.time.LocalDate birthdate, AccountScope accountScope,
 		String phoneNumber) {
 		Member member = findById(memberId);
 		member.updateProfile(nickname, profileImageUrl, birthdate, accountScope, phoneNumber);

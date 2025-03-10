@@ -52,4 +52,15 @@ public class ApiResponse {
 			.headers(headers)
 			.body(data);
 	}
+
+	/**
+	 * 실패 응답
+	 */
+	public static ResponseEntity<ApiResult<Void>> onFailure(String message) {
+		ApiResult<Void> result = ApiResult.<Void>builder()
+			.success(false)
+			.message(message)
+			.build();
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(result);
+	}
 }

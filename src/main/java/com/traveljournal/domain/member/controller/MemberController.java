@@ -1,6 +1,8 @@
 package com.traveljournal.domain.member.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,5 +42,18 @@ public class MemberController {
 
 		memberService.completeFirstLogin(memberId, firstLoginRequest);
 		return ApiResponse.success("첫 로그인 완료 처리되었습니다.");
+	}
+
+	@GetMapping("/check-nickname/{nickname}")
+	public ResponseEntity<?> checkNickname(@PathVariable("nickname") String nickname) {
+		// if (memberService.isProfane(nickname)) {
+		// 	return ApiResponse.onFailure("containsBadWord");
+		// } 비속어 추후 구현 -> mysql 로컬 내부에 있음
+		if (memberService.isDuplicate(nickname)) {
+			log.info("Check nickname {}", nickname);
+			return ApiResponse.onFailure("duplicate");
+		}
+		else
+			return ApiResponse.success("valid");
 	}
 }

@@ -14,9 +14,11 @@ import com.traveljournal.domain.member.repository.MemberRepository;
 import com.traveljournal.global.exception.ResourceNotFoundException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MemberService {
 
 	private final MemberRepository memberRepository;
@@ -85,5 +87,9 @@ public class MemberService {
 		Member member = findById(memberId);
 		member.updateProfile(nickname, profileImageUrl, birthdate, accountScope, phoneNumber);
 		return member;
+	}
+
+	public boolean isDuplicate(String nickname) {
+		return memberRepository.findByNickname(nickname) != null;
 	}
 }

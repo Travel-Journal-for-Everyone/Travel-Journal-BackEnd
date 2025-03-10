@@ -63,7 +63,7 @@ public class AuthController {
 		summary = "Kakao ID Token Login",
 		description = "카카오 ID 토큰을 이용한 로그인. Bearer 토큰을 Authorization 헤더에 포함해야 합니다."
 	)
-	@PostMapping("/login/{socialProvider}/id-token-login")
+	@PostMapping("/login/{socialProvider}/id-token")
 	public ResponseEntity<LoginResponse> kakaoLoginWithIdToken(
 		@Parameter(description = "카카오에서 반환한 id_Token을 헤더에 담아주세요. Bearer 필요")
 		@RequestHeader("Authorization") String authorizationHeader,

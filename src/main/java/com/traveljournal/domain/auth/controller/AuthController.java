@@ -19,6 +19,7 @@ import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -57,9 +58,11 @@ public class AuthController {
 	) {
 		SocialProvider socialProviderEnum = EnumUtils.toSocialProvider(socialProvider);
 
-		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithCode(socialProviderEnum,code, deviceId, platform);
+		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithCode(socialProviderEnum, code,
+			deviceId, platform);
 
-		return ResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
+		return ResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(),
+			loginCombinedResponse.accessToken());
 	}
 
 	@Operation(
@@ -84,9 +87,11 @@ public class AuthController {
 	) {
 		SocialProvider socialProviderEnum = EnumUtils.toSocialProvider(socialProvider);
 
-		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(socialProviderEnum, authorizationHeader, deviceId, platform);
+		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(socialProviderEnum,
+			authorizationHeader, deviceId, platform);
 
-		return ResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
+		return ResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(),
+			loginCombinedResponse.accessToken());
 	}
 
 	/**
@@ -96,7 +101,10 @@ public class AuthController {
 	@Operation(
 		summary = "Logout",
 		description = "특정 장치에서 로그아웃을 처리하고 해당 장치의 토큰을 삭제합니다.",
-		security = @SecurityRequirement(name = "bearer-key")
+		security = @SecurityRequirement(name = "bearer-key"),
+		responses = {
+			@ApiResponse(responseCode = "200", ref = "#/components/responses/Logout"),
+		}
 	)
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(
@@ -105,6 +113,6 @@ public class AuthController {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
 		authService.logout(memberId, deviceId);
-		return ResponseHandler.success("로그아웃되었습니다.");
+		return ResponseHandler.success("로그아웃 성공");
 	}
 }

@@ -14,6 +14,7 @@ import com.traveljournal.global.data.ResponseHandler;
 import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,15 +34,20 @@ public class MemberController {
 	 */
 	@Operation(
 		summary = "Complete First Login",
-		description = "사용자 온보딩이 완료되었을 때 호출됩니다.",
-		security = @SecurityRequirement(name = "bearer-key")
+		description = """
+			사용자 온보딩이 완료되었을 때 호출됩니다.
+			<br> accountScope = (PUBLIC, FRIENDS, PRIVATE)""",
+		security = @SecurityRequirement(name = "bearer-key"),
+		responses = {
+			@ApiResponse(responseCode = "200", ref = "#/components/responses/Success")
+		}
 	)
 	@PostMapping("/complete-first-login")
 	public ResponseEntity<?> completeFirstLogin(@RequestBody FirstLoginRequest firstLoginRequest) {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
 		memberService.completeFirstLogin(memberId, firstLoginRequest);
-		return ResponseHandler.success("첫 로그인 완료 처리되었습니다.");
+		return ResponseHandler.success("요청이 성공적으로 처리되었습니다.");
 	}
 
 	@GetMapping("/check-nickname/{nickname}")
@@ -52,7 +58,11 @@ public class MemberController {
 			<br> 중복 닉네임 : 상태코드 409 / duplicate
 			<br> 비속어 닉네임 : 상태코드 409 / containsBadWord
 			<br> 사용가능한 닉네임 : 상태코드 200 / valid""",
-		security = @SecurityRequirement(name = "bearer-key")
+		security = @SecurityRequirement(name = "bearer-key"),
+		responses = {
+			@ApiResponse(responseCode = "200", ref = "#/components/responses/ValidName"),
+			@ApiResponse(responseCode = "409", ref = "#/components/responses/DuplicateName")
+		}
 	)
 	public ResponseEntity<?> checkNickname(@PathVariable("nickname") String nickname) {
 		// if (memberService.isProfane(nickname)) {

@@ -4,13 +4,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-public class ApiResponse {
+public class ResponseHandler {
 
 	/**
 	 * 일반 성공 응답
 	 */
-	public static <T> ResponseEntity<ApiResult<T>> ok(T data) {
-		ApiResult<T> result = ApiResult.<T>builder()
+	public static <T> ResponseEntity<ResponseDto<T>> ok(T data) {
+		ResponseDto<T> result = ResponseDto.<T>builder()
 			.success(true)
 			.message("요청이 성공적으로 처리되었습니다.")
 			.data(data)
@@ -21,8 +21,8 @@ public class ApiResponse {
 	/**
 	 * 생성 성공 응답
 	 */
-	public static <T> ResponseEntity<ApiResult<T>> created(T data) {
-		ApiResult<T> result = ApiResult.<T>builder()
+	public static <T> ResponseEntity<ResponseDto<T>> created(T data) {
+		ResponseDto<T> result = ResponseDto.<T>builder()
 			.success(true)
 			.message("데이터가 성공적으로 생성되었습니다.")
 			.data(data)
@@ -33,8 +33,8 @@ public class ApiResponse {
 	/**
 	 * 성공 응답 (수정, 삭제)
 	 */
-	public static ResponseEntity<ApiResult<Void>> success(String message) {
-		ApiResult<Void> result = ApiResult.<Void>builder()
+	public static ResponseEntity<ResponseDto<Void>> success(String message) {
+		ResponseDto<Void> result = ResponseDto.<Void>builder()
 			.success(true)
 			.message(message)
 			.build();
@@ -56,8 +56,8 @@ public class ApiResponse {
 	/**
 	 * 실패 응답
 	 */
-	public static ResponseEntity<ApiResult<Void>> onFailure(String message) {
-		ApiResult<Void> result = ApiResult.<Void>builder()
+	public static ResponseEntity<ResponseDto<Void>> onFailure(String message) {
+		ResponseDto<Void> result = ResponseDto.<Void>builder()
 			.success(false)
 			.message(message)
 			.build();

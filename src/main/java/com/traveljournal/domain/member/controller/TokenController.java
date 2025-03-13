@@ -10,7 +10,7 @@ import com.traveljournal.domain.member.dto.MemberTokenResponse;
 import com.traveljournal.domain.member.dto.ReissueRequest;
 import com.traveljournal.domain.member.dto.ReissueResponse;
 import com.traveljournal.domain.member.service.TokenService;
-import com.traveljournal.global.data.ApiResponse;
+import com.traveljournal.global.data.ResponseHandler;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,6 +35,6 @@ public class TokenController {
 	@PostMapping("/reissue")
 	public ResponseEntity<ReissueResponse> refreshToken(@RequestBody ReissueRequest Reissuerequest) {
 		MemberTokenResponse memberTokenResponse = tokenService.refreshToken(Reissuerequest);
-		return ApiResponse.accessTokenResponse(ReissueResponse.of(memberTokenResponse), memberTokenResponse.tokenInfo().accessToken());
+		return ResponseHandler.accessTokenResponse(ReissueResponse.of(memberTokenResponse), memberTokenResponse.tokenInfo().accessToken());
 	}
 }

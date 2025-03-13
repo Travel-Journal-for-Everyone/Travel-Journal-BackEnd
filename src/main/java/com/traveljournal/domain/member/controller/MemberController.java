@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.traveljournal.domain.auth.dto.FirstLoginRequest;
 import com.traveljournal.domain.member.service.MemberService;
-import com.traveljournal.global.data.ApiResponse;
+import com.traveljournal.global.data.ResponseHandler;
 import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,7 +41,7 @@ public class MemberController {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
 		memberService.completeFirstLogin(memberId, firstLoginRequest);
-		return ApiResponse.success("첫 로그인 완료 처리되었습니다.");
+		return ResponseHandler.success("첫 로그인 완료 처리되었습니다.");
 	}
 
 	@GetMapping("/check-nickname/{nickname}")
@@ -60,9 +60,9 @@ public class MemberController {
 		// } 비속어 추후 구현 -> mysql 로컬 내부에 있음
 		if (memberService.isDuplicate(nickname)) {
 			log.info("Check nickname {}", nickname);
-			return ApiResponse.onFailure("duplicate");
+			return ResponseHandler.onFailure("duplicate");
 		}
 		else
-			return ApiResponse.success("valid");
+			return ResponseHandler.success("valid");
 	}
 }

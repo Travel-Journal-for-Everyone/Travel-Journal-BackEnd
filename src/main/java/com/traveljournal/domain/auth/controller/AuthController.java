@@ -14,7 +14,7 @@ import com.traveljournal.domain.auth.dto.LoginResponse;
 import com.traveljournal.domain.auth.service.AuthService;
 import com.traveljournal.domain.auth.util.EnumUtils;
 import com.traveljournal.domain.member.entity.SocialProvider;
-import com.traveljournal.global.data.ApiResponse;
+import com.traveljournal.global.data.ResponseHandler;
 import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,7 +49,7 @@ public class AuthController {
 		@Parameter(description = "디바이스 ID (선택 사항)")
 		@RequestParam(required = false) String deviceId,
 
-		@Parameter(description = "소셜로그인 제공자")
+		@Parameter(description = "소셜로그인 제공자 (kakao, google, apple)")
 		@PathVariable String socialProvider,
 
 		@Parameter(description = "플랫폼 (web, ios, android)")
@@ -59,7 +59,7 @@ public class AuthController {
 
 		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithCode(socialProviderEnum,code, deviceId, platform);
 
-		return ApiResponse.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
+		return ResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
 	}
 
 	@Operation(
@@ -76,7 +76,7 @@ public class AuthController {
 		@Parameter(description = "디바이스 ID (선택 사항)")
 		@RequestParam(required = false) String deviceId,
 
-		@Parameter(description = "소셜로그인 제공자", example = "kakao, google, apple 셋 중 하나")
+		@Parameter(description = "소셜로그인 제공자 (kakao, google, apple)")
 		@PathVariable String socialProvider,
 
 		@Parameter(description = "플랫폼 (web, ios, android)")
@@ -86,7 +86,7 @@ public class AuthController {
 
 		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(socialProviderEnum, authorizationHeader, deviceId, platform);
 
-		return ApiResponse.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
+		return ResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
 	}
 
 	/**
@@ -105,6 +105,6 @@ public class AuthController {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
 		authService.logout(memberId, deviceId);
-		return ApiResponse.success("로그아웃되었습니다.");
+		return ResponseHandler.success("로그아웃되었습니다.");
 	}
 }

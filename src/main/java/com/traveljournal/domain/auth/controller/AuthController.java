@@ -50,18 +50,23 @@ public class AuthController {
 		@RequestParam(required = false) String deviceId,
 
 		@Parameter(description = "소셜로그인 제공자")
-		@PathVariable String socialProvider
+		@PathVariable String socialProvider,
+
+		@Parameter(description = "플랫폼 (web, ios, android)")
+		@RequestHeader(value = "X-Platform", defaultValue = "web") String platform
 	) {
 		SocialProvider socialProviderEnum = EnumUtils.toSocialProvider(socialProvider);
 
-		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithCode(socialProviderEnum,code, deviceId);
+		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithCode(socialProviderEnum,code, deviceId, platform);
 
 		return ApiResponse.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
 	}
 
 	@Operation(
-		summary = "Kakao ID Token Login",
-		description = "카카오 ID 토큰을 이용한 로그인. Bearer 토큰을 Authorization 헤더에 포함해야 합니다."
+		summary = "Social ID Token Login",
+		description = """
+			ID 토큰을 이용한 로그인. Bearer 토큰을 Authorization 헤더에 포함해야 합니다.
+			<br> X-Platform 헤더에 (web, ios, android)를 포함해야 합니다."""
 	)
 	@PostMapping("/login/{socialProvider}/id-token")
 	public ResponseEntity<LoginResponse> kakaoLoginWithIdToken(
@@ -72,11 +77,14 @@ public class AuthController {
 		@RequestParam(required = false) String deviceId,
 
 		@Parameter(description = "소셜로그인 제공자", example = "kakao, google, apple 셋 중 하나")
-		@PathVariable String socialProvider
+		@PathVariable String socialProvider,
+
+		@Parameter(description = "플랫폼 (web, ios, android)")
+		@RequestHeader(value = "X-Platform", defaultValue = "web") String platform
 	) {
 		SocialProvider socialProviderEnum = EnumUtils.toSocialProvider(socialProvider);
 
-		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(socialProviderEnum, authorizationHeader, deviceId);
+		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(socialProviderEnum, authorizationHeader, deviceId, platform);
 
 		return ApiResponse.accessTokenResponse(loginCombinedResponse.LoginResponse(), loginCombinedResponse.accessToken());
 	}

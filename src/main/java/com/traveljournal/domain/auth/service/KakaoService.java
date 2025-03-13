@@ -2,9 +2,9 @@ package com.traveljournal.domain.auth.service;
 
 import org.springframework.stereotype.Service;
 
-import com.traveljournal.domain.auth.dto.KakaoIdTokenInfo;
-import com.traveljournal.domain.auth.dto.KakaoMemberInfo;
-import com.traveljournal.domain.auth.dto.KakaoTokenResponse;
+import com.traveljournal.domain.auth.dto.kakao.KakaoIdTokenInfo;
+import com.traveljournal.domain.auth.dto.kakao.KakaoMemberInfo;
+import com.traveljournal.domain.auth.dto.kakao.KakaoTokenResponse;
 import com.traveljournal.domain.auth.dto.LoginCombinedResponse;
 import com.traveljournal.domain.auth.dto.LoginResponse;
 import com.traveljournal.domain.auth.util.KakaoClient;
@@ -58,7 +58,6 @@ public class KakaoService {
 			KakaoMemberInfo.of(
 				Long.parseLong(kakaoIdTokenInfo.sub()),
 				kakaoIdTokenInfo.email(),
-				kakaoIdTokenInfo.nickname(),
 				kakaoIdTokenInfo.profile_image_url()
 			), socialProvider
 		);

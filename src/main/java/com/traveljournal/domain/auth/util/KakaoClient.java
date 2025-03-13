@@ -10,8 +10,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.traveljournal.domain.auth.dto.KakaoIdTokenInfo;
-import com.traveljournal.domain.auth.dto.KakaoTokenResponse;
+import com.traveljournal.domain.auth.dto.kakao.KakaoIdTokenInfo;
+import com.traveljournal.domain.auth.dto.kakao.KakaoTokenResponse;
 import com.traveljournal.global.config.KakaoOAuthConfig;
 import com.traveljournal.global.exception.ExternalApiException;
 

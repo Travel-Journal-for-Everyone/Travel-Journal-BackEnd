@@ -35,6 +35,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.2.0'
+
+    // Commons IO - openfeign 취약점 해결
+    implementation 'commons-io:commons-io:2.14.0'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

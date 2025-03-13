@@ -1,12 +1,13 @@
 package com.traveljournal.domain.member.service;
 
 import java.util.Optional;
+import java.util.Random;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.traveljournal.domain.auth.dto.FirstLoginRequest;
-import com.traveljournal.domain.auth.dto.KakaoMemberInfo;
+import com.traveljournal.domain.auth.dto.SocialMemberInfo;
 import com.traveljournal.domain.member.entity.AccountScope;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.entity.SocialProvider;
@@ -44,8 +45,8 @@ public class MemberService {
 	 * 카카오 회원정보를 바탕으로 회원 조회 또는 생성
 	 */
 	@Transactional
-	public Member findOrCreateMember(KakaoMemberInfo kakaoMemberInfo, SocialProvider socialProvider) {
-		String email = kakaoMemberInfo.kakao_account().email();
+	public Member findOrCreateMember(SocialMemberInfo socialMemberInfo, SocialProvider socialProvider) {
+		String email = socialMemberInfo.getEmail();
 
 		Optional<Member> existingMember = findByEmail(email);
 
@@ -53,16 +54,19 @@ public class MemberService {
 			return existingMember.get();
 		}
 
-		Member newMember = createNewMember(kakaoMemberInfo, socialProvider);
+		Member newMember = createNewMember(socialMemberInfo, socialProvider);
 
 		return memberRepository.save(newMember);
 	}
 
-	public Member createNewMember(KakaoMemberInfo kakaoMemberInfo, SocialProvider socialProvider) {
+	public Member createNewMember(SocialMemberInfo socialMemberInfo, SocialProvider socialProvider) {
+
+		String randomNickname = generateRandomNickname();
+		
 		return Member.builder()
-			.email(kakaoMemberInfo.kakao_account().email())
-			.nickname(kakaoMemberInfo.kakao_account().profile().nickname())
-			.profileImageUrl(kakaoMemberInfo.kakao_account().profile().profile_image_url())
+			.email(socialMemberInfo.getEmail())
+			.nickname(randomNickname)
+			.profileImageUrl(socialMemberInfo.getProfileImageUrl())
 			.accountScope(AccountScope.PUBLIC)
 			.socialProvider(socialProvider)
 			.build();
@@ -92,5 +96,34 @@ public class MemberService {
 	@Transactional(readOnly = true)
 	public boolean isDuplicate(String nickname) {
 		return memberRepository.findByNickname(nickname) != null;
+	}
+
+	private String generateRandomNickname() {
+		// 알파벳 문자열 정의
+		String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		String lowerAlphabet = alphabet.toLowerCase();
+
+		// 랜덤 객체 생성
+		Random random = new Random();
+
+		// StringBuilder 생성
+		StringBuilder sb = new StringBuilder();
+
+		// 랜덤 닉네임 길이 (예: 8자)
+		int length = 8;
+
+		// 첫 글자는 대문자로
+		sb.append(alphabet.charAt(random.nextInt(alphabet.length())));
+
+		// 나머지 글자 생성
+		for(int i = 1; i < length; i++) {
+			sb.append(lowerAlphabet.charAt(random.nextInt(lowerAlphabet.length())));
+		}
+
+		// 숫자 추가 (예: 10-99)
+		int randomNumber = random.nextInt(90) + 10;
+		sb.append(randomNumber);
+
+		return "User" + sb.toString();
 	}
 }

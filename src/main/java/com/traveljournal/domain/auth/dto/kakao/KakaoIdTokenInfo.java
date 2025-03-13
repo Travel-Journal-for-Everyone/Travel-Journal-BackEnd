@@ -1,4 +1,4 @@
-package com.traveljournal.domain.auth.dto;
+package com.traveljournal.domain.auth.dto.kakao;
 
 import lombok.Builder;
 

@@ -1,4 +1,4 @@
-package com.traveljournal.domain.auth.dto;
+package com.traveljournal.domain.auth.dto.kakao;
 
 public record KakaoTokenResponse(
 	String access_token,

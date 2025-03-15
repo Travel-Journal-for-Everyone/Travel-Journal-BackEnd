@@ -53,26 +53,26 @@ public class JwtTokenProvider {
 	/**
 	 * JWT Access Token 생성
 	 */
-	public String createAccessToken(String email) {
-		return createToken(email, accessTokenExpiration);
+	public String createAccessToken(String providerId) {
+		return createToken(providerId, accessTokenExpiration);
 	}
 
 	/**
 	 * JWT Refresh Token 생성
 	 */
-	public String createRefreshToken(String email) {
-		return createToken(email, refreshTokenExpiration);
+	public String createRefreshToken(String providerId) {
+		return createToken(providerId, refreshTokenExpiration);
 	}
 
 	/**
 	 * JWT 토큰 생성 공통 로직
 	 */
-	private String createToken(String email, long expirationTime) {
+	private String createToken(String providerId, long expirationTime) {
 		Date now = new Date();
 		Date validity = new Date(now.getTime() + expirationTime);
 
 		return Jwts.builder()
-			.setSubject(email)
+			.setSubject(providerId)
 			.setIssuedAt(now)
 			.setExpiration(validity)
 			.signWith(secretKey)
@@ -80,9 +80,9 @@ public class JwtTokenProvider {
 	}
 
 	/**
-	 * JWT 토큰에서 이메일 추출
+	 * JWT 토큰에서 providerId 추출
 	 */
-	public String getEmail(String token) {
+	public String getProviderId(String token) {
 		try {
 			return Jwts.parserBuilder()
 				.setSigningKey(secretKey)
@@ -91,7 +91,7 @@ public class JwtTokenProvider {
 				.getBody()
 				.getSubject();
 		} catch (ExpiredJwtException e) {
-			// 만료된 토큰이라도 이메일은 추출
+			// 만료된 토큰이라도 고유번호는 추출
 			return e.getClaims().getSubject();
 		}
 	}
@@ -155,8 +155,8 @@ public class JwtTokenProvider {
 	 * 인증 객체를 SecurityContext에 저장
 	 */
 	public void setAuthentication(String token) {
-		String email = getEmail(token);
-		UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+		String providerId = getProviderId(token);
+		UserDetails userDetails = userDetailsService.loadUserByUsername(providerId);
 
 		Authentication authentication = new UsernamePasswordAuthenticationToken(
 			userDetails, null, userDetails.getAuthorities());

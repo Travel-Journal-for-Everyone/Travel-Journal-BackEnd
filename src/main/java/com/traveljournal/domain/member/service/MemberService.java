@@ -33,6 +33,14 @@ public class MemberService {
 	}
 
 	/**
+	 * 소셜 고유 회원번호로 조회
+	 */
+	@Transactional(readOnly = true)
+	public Optional<Member> findByProviderId(String providerId) {
+		return memberRepository.findByProviderId(providerId);
+	}
+
+	/**
 	 * ID로 회원 조회
 	 */
 	@Transactional(readOnly = true)
@@ -46,9 +54,9 @@ public class MemberService {
 	 */
 	@Transactional
 	public Member findOrCreateMember(SocialMemberInfo socialMemberInfo, SocialProvider socialProvider) {
-		String email = socialMemberInfo.getEmail();
+		String providerId = socialMemberInfo.getId();
 
-		Optional<Member> existingMember = findByEmail(email);
+		Optional<Member> existingMember = findByProviderId(providerId);
 
 		if (existingMember.isPresent()) {
 			return existingMember.get();
@@ -64,6 +72,7 @@ public class MemberService {
 		String randomNickname = generateRandomNickname();
 		
 		return Member.builder()
+			.providerId(socialMemberInfo.getId())
 			.email(socialMemberInfo.getEmail())
 			.nickname(randomNickname)
 			.profileImageUrl(socialMemberInfo.getProfileImageUrl())

@@ -31,13 +31,13 @@ public class TokenService {
 	/**
 	 * JWT 토큰 생성
 	 */
-	public TokenInfo createTokens(String email, String deviceId) {
+	public TokenInfo createTokens(String providerId, String deviceId) {
 		// 장치 ID가 없으면 생성
 		if (deviceId == null || deviceId.isBlank()) {
 			deviceId = UUID.randomUUID().toString();
 		}
-		String accessToken = jwtTokenProvider.createAccessToken(email);
-		String refreshToken = jwtTokenProvider.createRefreshToken(email);
+		String accessToken = jwtTokenProvider.createAccessToken(providerId);
+		String refreshToken = jwtTokenProvider.createRefreshToken(providerId);
 		return TokenInfo.of(accessToken, refreshToken, deviceId);
 	}
 
@@ -99,8 +99,8 @@ public class TokenService {
 
 		// 장치 ID로 토큰 정보 조회
 		String deviceId = reissueRequest.deviceId();
-		String email = jwtTokenProvider.getEmail(reissueRequest.refreshToken());
-		Member member = memberService.findByEmail(email)
+		String providerId = jwtTokenProvider.getProviderId(reissueRequest.refreshToken());
+		Member member = memberService.findByProviderId(providerId)
 			.orElseThrow(() -> new UnauthorizedException("존재하지 않는 회원입니다."));
 
 		// 저장된 토큰 조회
@@ -113,7 +113,7 @@ public class TokenService {
 		}
 
 		// 새 액세스 토큰 발급
-		String newAccessToken = jwtTokenProvider.createAccessToken(email);
+		String newAccessToken = jwtTokenProvider.createAccessToken(providerId);
 
 		return MemberTokenResponse.builder()
 			.memberId(member.getId())

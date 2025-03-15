@@ -26,8 +26,10 @@ public class Member {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true, length = 255)
 	private String email;
+
+	@Column(nullable = false, unique = true, length = 255)
+	private String providerId;
 
 	@Column(nullable = false, length = 50)
 	private String nickname;
@@ -62,8 +64,9 @@ public class Member {
 	}
 
 	@Builder
-	public Member(String email, String nickname, String profileImageUrl, LocalDate birthdate,
+	public Member(String providerId, String email, String nickname, String profileImageUrl, LocalDate birthdate,
 		AccountScope accountScope, String phoneNumber, SocialProvider socialProvider) {
+		this.providerId = providerId;
 		this.email = email;
 		this.nickname = nickname;
 		this.profileImageUrl = profileImageUrl;

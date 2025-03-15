@@ -18,18 +18,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 	private final Long memberId;  // 추가
-	private final String email;
+	private final String providerId;
 	private final Collection<? extends GrantedAuthority> authorities;
 
 	public CustomUserDetails(Member member) {
 		this.memberId = member.getId();
-		this.email = member.getEmail();
+		this.providerId = member.getProviderId();
 		this.authorities = Collections.singletonList(() -> "ROLE_USER"); // 기본 권한 설정
 	}
 
 	@Override
 	public String getUsername() {
-		return email;
+		return providerId;
 	}
 
 	@Override

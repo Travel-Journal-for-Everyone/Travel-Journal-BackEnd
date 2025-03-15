@@ -60,7 +60,7 @@ public class GoogleService {
 
 	private TokenInfo createAndSaveTokens(Member member, String deviceId) {
 		// JWT 토큰 생성
-		TokenInfo tokenInfo = tokenService.createTokens(member.getEmail(), deviceId);
+		TokenInfo tokenInfo = tokenService.createTokens(member.getProviderId(), deviceId);
 
 		// 토큰 저장
 		tokenService.saveOrUpdateToken(member, tokenInfo.deviceId(), tokenInfo.refreshToken());

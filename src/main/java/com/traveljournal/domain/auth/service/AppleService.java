@@ -212,7 +212,10 @@ public class AppleService {
 			// 사용자 정보 추출
 			String subject = claims.getSubject(); // 애플 사용자 ID
 			String email = claims.get("email", String.class);
-			boolean emailVerified = claims.get("email_verified", Boolean.class);
+
+			// email_verified 필드 null 체크 추가
+			Boolean emailVerifiedClaim = claims.get("email_verified", Boolean.class);
+			boolean emailVerified = emailVerifiedClaim != null && emailVerifiedClaim;
 
 			// 사용자 정보가 담긴 객체 반환
 			return new AppleIdTokenInfo(subject, email, emailVerified);
@@ -244,7 +247,7 @@ public class AppleService {
 
 	private TokenInfo createAndSaveTokens(Member member, String deviceId) {
 		// JWT 토큰 생성
-		TokenInfo tokenInfo = tokenService.createTokens(member.getEmail(), deviceId);
+		TokenInfo tokenInfo = tokenService.createTokens(member.getProviderId(), deviceId);
 
 		// 토큰 저장
 		tokenService.saveOrUpdateToken(member, tokenInfo.deviceId(), tokenInfo.refreshToken());

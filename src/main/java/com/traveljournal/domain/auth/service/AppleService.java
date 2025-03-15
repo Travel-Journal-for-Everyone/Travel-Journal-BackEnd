@@ -78,14 +78,16 @@ public class AppleService {
 	 * 4. JWT 토큰 생성 및 저장
 	 * 5. 로그인 응답 생성
 	 */
-	public LoginCombinedResponse processAppleLoginWithCode(String code, String deviceId, SocialProvider socialProvider, String platform) {
+	public LoginCombinedResponse processAppleLoginWithCode(String code, String deviceId, SocialProvider socialProvider,
+		String platform) {
 		// 애플 토큰 획득
 		AppleTokenResponse appleTokenResponse = getAppleToken(code);
 
 		return processAppleLoginWithIdToken(appleTokenResponse.idToken(), deviceId, socialProvider, platform);
 	}
 
-	public LoginCombinedResponse processAppleLoginWithIdToken(String idToken, String deviceId, SocialProvider socialProvider, String platform) {
+	public LoginCombinedResponse processAppleLoginWithIdToken(String idToken, String deviceId,
+		SocialProvider socialProvider, String platform) {
 		// ID 토큰 검증 및 사용자 정보 추출
 		AppleIdTokenInfo appleIdTokenInfo = verifyAndParseIdToken(idToken, platform);
 

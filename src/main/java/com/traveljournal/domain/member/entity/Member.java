@@ -78,11 +78,13 @@ public class Member {
 		this.isFirstLogin = true;
 	}
 
-	// 첫 로그인 상태 변경
-	public void completeFirstLogin(String nickname, AccountScope accountScope) {
+	public void completeFirstLoginWithProfileImage(String nickname, AccountScope accountScope, String profileImageUrl) {
 		this.isFirstLogin = false;
 		this.nickname = nickname;
 		this.accountScope = accountScope;
+		if (profileImageUrl != null) {
+			this.profileImageUrl = profileImageUrl;
+		}
 	}
 
 	// 회원 정보 업데이트

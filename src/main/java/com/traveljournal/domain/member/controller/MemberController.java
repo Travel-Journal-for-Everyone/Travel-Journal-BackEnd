@@ -1,12 +1,14 @@
 package com.traveljournal.domain.member.controller;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.traveljournal.domain.auth.dto.FirstLoginRequest;
 import com.traveljournal.domain.member.service.MemberService;
@@ -42,11 +44,14 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", ref = "#/components/responses/Success")
 		}
 	)
-	@PostMapping("/complete-first-login")
-	public ResponseEntity<?> completeFirstLogin(@RequestBody FirstLoginRequest firstLoginRequest) {
+	@PostMapping(value = "/complete-first-login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> completeFirstLogin(
+		@RequestPart("firstLoginRequest") FirstLoginRequest firstLoginRequest,
+		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage
+		) {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
-		memberService.completeFirstLogin(memberId, firstLoginRequest);
+		memberService.completeFirstLogin(memberId, firstLoginRequest, profileImage);
 		return ResponseHandler.success("요청이 성공적으로 처리되었습니다.");
 	}
 

@@ -5,7 +5,9 @@ import java.util.Random;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.auth.dto.FirstLoginRequest;
 import com.traveljournal.domain.auth.dto.SocialMemberInfo;
 import com.traveljournal.domain.member.entity.AccountScope;
@@ -14,6 +16,8 @@ import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.repository.MemberRepository;
 import com.traveljournal.global.exception.ResourceNotFoundException;
 
+import io.jsonwebtoken.io.IOException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberService {
 
 	private final MemberRepository memberRepository;
+	private final ImageService imageService;
 
 	/**
 	 * 이메일로 회원 조회
@@ -85,9 +90,31 @@ public class MemberService {
 	 * 첫 로그인 완료 처리
 	 */
 	@Transactional
-	public void completeFirstLogin(Long memberId, FirstLoginRequest firstLoginRequest) {
-		Member member = findById(memberId);
-		member.completeFirstLogin(firstLoginRequest.nickname(), firstLoginRequest.accountScope());
+	public void completeFirstLogin(Long memberId, FirstLoginRequest request, MultipartFile profileImage) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다."));
+
+		String profileImageUrl = null;
+
+		// 프로필 이미지가 제공된 경우 업로드
+		if (profileImage != null && !profileImage.isEmpty()) {
+			try {
+				profileImageUrl = imageService.uploadProfileImage(profileImage, memberId);
+			} catch (IOException e) {
+				throw new RuntimeException("이미지 업로드 중 오류가 발생했습니다.", e);
+			} catch (java.io.IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		// 회원 정보 업데이트
+		member.completeFirstLoginWithProfileImage(
+			request.getNickname(),
+			request.getAccountScope(),
+			profileImageUrl
+		);
+
+		memberRepository.save(member);
 	}
 
 	/**

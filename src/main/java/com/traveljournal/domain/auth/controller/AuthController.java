@@ -14,7 +14,7 @@ import com.traveljournal.domain.auth.dto.LoginResponse;
 import com.traveljournal.domain.auth.service.AuthService;
 import com.traveljournal.domain.auth.util.EnumUtils;
 import com.traveljournal.domain.member.entity.SocialProvider;
-import com.traveljournal.global.data.ResponseHandler;
+import com.traveljournal.global.data.ApiResponseHandler;
 import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,7 +61,7 @@ public class AuthController {
 		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithCode(socialProviderEnum, code,
 			deviceId, platform);
 
-		return ResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(),
+		return ApiResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(),
 			loginCombinedResponse.accessToken());
 	}
 
@@ -90,7 +90,7 @@ public class AuthController {
 		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(socialProviderEnum,
 			authorizationHeader, deviceId, platform);
 
-		return ResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(),
+		return ApiResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(),
 			loginCombinedResponse.accessToken());
 	}
 
@@ -113,6 +113,6 @@ public class AuthController {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
 		authService.logout(memberId, deviceId);
-		return ResponseHandler.success("로그아웃 성공");
+		return ApiResponseHandler.deletedSuccess("로그아웃 성공");
 	}
 }

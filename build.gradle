@@ -28,7 +28,7 @@ configurations {
 repositories {
     mavenCentral()
     google()  // Google Maven Repository 추가
-    maven { url 'https://jitpack.io' }  // JitPack 저장소 추가
+    maven { url = uri('https://jitpack.io') } // JitPack 저장소 추가
 }
 
 dependencies {

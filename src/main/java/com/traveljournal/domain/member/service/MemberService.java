@@ -14,6 +14,7 @@ import com.traveljournal.domain.member.entity.AccountScope;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.repository.MemberRepository;
+import com.traveljournal.domain.member.dto.MemberProfileResponse;
 import com.traveljournal.global.exception.ResourceNotFoundException;
 
 import io.jsonwebtoken.io.IOException;
@@ -161,5 +162,13 @@ public class MemberService {
 		sb.append(randomNumber);
 
 		return "User" + sb.toString();
+	}
+
+	@Transactional(readOnly = true)
+	public MemberProfileResponse getMemberProfile(Long memberId) {
+
+		Member member = findById(memberId);
+
+		return MemberProfileResponse.of(member);
 	}
 }

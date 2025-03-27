@@ -12,7 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.traveljournal.domain.auth.dto.FirstLoginRequest;
 import com.traveljournal.domain.member.service.MemberService;
-import com.traveljournal.global.data.ResponseHandler;
+import com.traveljournal.domain.member.dto.MemberProfileResponse;
+import com.traveljournal.global.data.ApiResponseHandler;
 import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,10 +40,7 @@ public class MemberController {
 		description = """
 			사용자 온보딩이 완료되었을 때 호출됩니다.
 			<br> accountScope = (PUBLIC, FRIENDS, PRIVATE)""",
-		security = @SecurityRequirement(name = "bearer-key"),
-		responses = {
-			@ApiResponse(responseCode = "200", ref = "#/components/responses/Success")
-		}
+		security = @SecurityRequirement(name = "bearer-key")
 	)
 	@PostMapping(value = "/complete-first-login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> completeFirstLogin(
@@ -52,7 +50,7 @@ public class MemberController {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
 		memberService.completeFirstLogin(memberId, firstLoginRequest, profileImage);
-		return ResponseHandler.success("요청이 성공적으로 처리되었습니다.");
+		return ApiResponseHandler.createdSuccess("요청이 성공적으로 처리되었습니다.");
 	}
 
 	@GetMapping("/check-nickname/{nickname}")
@@ -75,9 +73,23 @@ public class MemberController {
 		// } 비속어 추후 구현 -> mysql 로컬 내부에 있음
 		if (memberService.isDuplicate(nickname)) {
 			log.info("Check nickname {}", nickname);
-			return ResponseHandler.onFailure("duplicate");
+			return ApiResponseHandler.onFailure("duplicate");
 		}
 		else
-			return ResponseHandler.success("valid");
+			return ApiResponseHandler.onSuccess("valid");
+	}
+
+	@GetMapping("/profile")
+	@Operation(
+		summary = "Member Profile",
+		security = @SecurityRequirement(name = "bearer-key"),
+		description = "마이페이지에 들어가는 회원 프로필 정보입니다."
+	)
+	public ResponseEntity<MemberProfileResponse> findMemberProfile() {
+		Long memberId = SecurityUtil.getCurrentMemberId();
+
+		MemberProfileResponse memberProfileResponse = memberService.getMemberProfile(memberId);
+
+		return ApiResponseHandler.getObjectSuccess(memberProfileResponse);
 	}
 }

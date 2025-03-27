@@ -21,6 +21,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traveljournal.domain.auth.dto.LoginCombinedResponse;
 import com.traveljournal.domain.auth.dto.LoginResponse;
@@ -162,7 +163,7 @@ public class AppleService {
 
 			// 헤더 파싱
 			String headerJson = new String(Base64.getUrlDecoder().decode(tokenParts[0]));
-			Map<String, String> header = objectMapper.readValue(headerJson, Map.class);
+			Map<String, String> header = objectMapper.readValue(headerJson, new TypeReference<Map<String, String>>() {});
 			String kid = header.get("kid");
 			String alg = header.get("alg");
 

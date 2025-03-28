@@ -98,8 +98,4 @@ public class Member {
 		this.phoneNumber = phoneNumber;
 	}
 
-	// 회원 삭제 (soft delete)
-	public void delete() {
-		this.isDeleted = true;
-	}
 }

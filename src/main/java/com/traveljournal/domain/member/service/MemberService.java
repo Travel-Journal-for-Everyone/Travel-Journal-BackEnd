@@ -10,11 +10,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.auth.dto.FirstLoginRequest;
 import com.traveljournal.domain.auth.dto.SocialMemberInfo;
+import com.traveljournal.domain.member.dto.MemberProfileResponse;
 import com.traveljournal.domain.member.entity.AccountScope;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.repository.MemberRepository;
-import com.traveljournal.domain.member.dto.MemberProfileResponse;
+import com.traveljournal.domain.member.repository.TokenRepository;
 import com.traveljournal.global.exception.ResourceNotFoundException;
 
 import io.jsonwebtoken.io.IOException;
@@ -29,6 +30,7 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final ImageService imageService;
+	private final TokenRepository tokenRepository;
 
 	/**
 	 * 이메일로 회원 조회
@@ -170,5 +172,14 @@ public class MemberService {
 		Member member = findById(memberId);
 
 		return MemberProfileResponse.of(member);
+	}
+
+	@Transactional
+	public void deleteMember(Long memberId) {
+		Member member = findById(memberId);
+
+		tokenRepository.deleteAllByMemberId(memberId);
+
+		memberRepository.delete(member);
 	}
 }

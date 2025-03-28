@@ -2,6 +2,7 @@ package com.traveljournal.domain.auth.util;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -78,6 +79,31 @@ public class KakaoClient {
 		} catch (Exception e) {
 			log.error("ID Token 파싱 실패: {}", e.getMessage());
 			throw new ExternalApiException("ID Token 파싱에 실패했습니다: " + e.getMessage());
+		}
+	}
+
+	public void unlinkKakaoUser(String kakaoUserId) {
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Authorization", "KakaoAK " + kakaoOAuthConfig.getAdminKey());
+
+			MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+			params.add("target_id_type", "user_id");
+			params.add("target_id", kakaoUserId);
+
+			HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
+
+			restTemplate.exchange(
+				"https://kapi.kakao.com/v1/user/unlink",
+				HttpMethod.POST,
+				entity,
+				Void.class
+			);
+
+			log.info("카카오 연결 끊기 성공: kakaoUserId={}", kakaoUserId);
+		} catch (Exception e) {
+			log.error("카카오 연결 끊기 실패: {}", e.getMessage());
+			throw new ExternalApiException("카카오 연결 끊기에 실패했습니다: " + e.getMessage());
 		}
 	}
 }

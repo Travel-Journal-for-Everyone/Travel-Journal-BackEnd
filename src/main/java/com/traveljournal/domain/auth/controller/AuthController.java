@@ -1,6 +1,7 @@
 package com.traveljournal.domain.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -114,5 +115,16 @@ public class AuthController {
 
 		authService.logout(memberId, deviceId);
 		return ApiResponseHandler.deletedSuccess("로그아웃 성공");
+	}
+
+	@DeleteMapping("/{socialProvider}/unlink")
+	public ResponseEntity<?> unlinkSocialAccount(
+		@Parameter(description = "소셜로그인 제공자 (kakao, google, apple)")
+		@PathVariable String socialProvider) {
+		Long memberId = SecurityUtil.getCurrentMemberId();
+		SocialProvider socialProviderEnum = EnumUtils.toSocialProvider(socialProvider);
+
+		authService.unlinkSocialAccount(memberId, socialProviderEnum);
+		return ApiResponseHandler.deletedSuccess("연결끊기 성공");
 	}
 }

@@ -2,22 +2,25 @@ package com.traveljournal.domain.auth.service;
 
 import org.springframework.stereotype.Service;
 
+import com.traveljournal.domain.auth.dto.LoginCombinedResponse;
+import com.traveljournal.domain.auth.dto.LoginResponse;
 import com.traveljournal.domain.auth.dto.kakao.KakaoIdTokenInfo;
 import com.traveljournal.domain.auth.dto.kakao.KakaoMemberInfo;
 import com.traveljournal.domain.auth.dto.kakao.KakaoTokenResponse;
-import com.traveljournal.domain.auth.dto.LoginCombinedResponse;
-import com.traveljournal.domain.auth.dto.LoginResponse;
 import com.traveljournal.domain.auth.util.KakaoClient;
 import com.traveljournal.domain.member.dto.TokenInfo;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.member.service.TokenService;
+import com.traveljournal.global.exception.ExternalApiException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KakaoService {
 
 	private final TokenService tokenService;
@@ -52,6 +55,32 @@ public class KakaoService {
 
 		return createLoginResponse(member, tokenInfo);
 	}
+
+	/**
+	 * 카카오 계정 연결 끊기 (회원탈퇴)
+	 * 1. 카카오 API를 통해 연결 끊기 요청
+	 * 2. 회원 정보 삭제
+	 */
+	public void unlinkKakaoAccount(Long memberId) {
+		try {
+			log.info("카카오 계정 연결 끊기 시작: memberId={}", memberId);
+
+			// 회원 정보 조회
+			Member member = memberService.findById(memberId);
+
+			// 카카오 API를 통해 연결 끊기
+			kakaoClient.unlinkKakaoUser(member.getProviderId());
+
+			// 회원 정보 삭제
+			memberService.deleteMember(memberId);
+
+			log.info("카카오 계정 연결 끊기 완료: memberId={}", memberId);
+		} catch (Exception e) {
+			log.error("카카오 계정 연결 끊기 실패: {}", e.getMessage());
+			throw new ExternalApiException("카카오 계정 연결 끊기에 실패했습니다: " + e.getMessage());
+		}
+	}
+
 
 	private Member getMemberFromIdToken(KakaoIdTokenInfo kakaoIdTokenInfo, SocialProvider socialProvider) {
 		return memberService.findOrCreateMember(

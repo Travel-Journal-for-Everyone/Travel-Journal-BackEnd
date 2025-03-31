@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.traveljournal.domain.Image.service.ImageService;
-import com.traveljournal.domain.member.dto.FirstLoginRequest;
 import com.traveljournal.domain.auth.dto.SocialMemberInfo;
+import com.traveljournal.domain.member.dto.FirstLoginRequest;
 import com.traveljournal.domain.member.dto.MemberProfileResponse;
 import com.traveljournal.domain.member.entity.AccountScope;
 import com.traveljournal.domain.member.entity.Member;
@@ -19,7 +19,9 @@ import com.traveljournal.domain.member.repository.TokenRepository;
 import com.traveljournal.global.exception.ResourceNotFoundException;
 
 import io.jsonwebtoken.io.IOException;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +33,9 @@ public class MemberService {
 	private final MemberRepository memberRepository;
 	private final ImageService imageService;
 	private final TokenRepository tokenRepository;
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	/**
 	 * 이메일로 회원 조회
@@ -176,10 +181,19 @@ public class MemberService {
 
 	@Transactional
 	public void deleteMember(Long memberId) {
-		Member member = findById(memberId);
+		try {
+			Member member = findById(memberId);
 
-		tokenRepository.deleteAllByMemberId(memberId);
+			tokenRepository.deleteAllByMemberId(memberId);
+			memberRepository.delete(member);
 
-		memberRepository.delete(member);
+			memberRepository.flush();
+			entityManager.clear();
+
+			log.info("회원 삭제 완료. ID: {}", memberId);
+		} catch (Exception e) {
+			log.error("회원 삭제 중 오류 발생. ID: {}", memberId, e);
+			throw new RuntimeException("회원 삭제 중 오류가 발생했습니다.", e);
+		}
 	}
 }

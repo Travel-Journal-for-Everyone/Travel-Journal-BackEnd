@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.traveljournal.domain.auth.dto.FirstLoginRequest;
+import com.traveljournal.domain.member.dto.FirstLoginRequest;
 import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.member.dto.MemberProfileResponse;
 import com.traveljournal.global.data.ApiResponseHandler;
@@ -46,7 +46,7 @@ public class MemberController {
 	public ResponseEntity<?> completeFirstLogin(
 		@RequestPart("firstLoginRequest") FirstLoginRequest firstLoginRequest,
 		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage
-		) {
+	) {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
 		memberService.completeFirstLogin(memberId, firstLoginRequest, profileImage);
@@ -74,8 +74,7 @@ public class MemberController {
 		if (memberService.isDuplicate(nickname)) {
 			log.info("Check nickname {}", nickname);
 			return ApiResponseHandler.onFailure("duplicate");
-		}
-		else
+		} else
 			return ApiResponseHandler.onSuccess("valid");
 	}
 

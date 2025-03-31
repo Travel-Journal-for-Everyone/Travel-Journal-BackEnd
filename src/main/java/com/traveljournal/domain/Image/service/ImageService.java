@@ -1,15 +1,11 @@
 package com.traveljournal.domain.Image.service;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import net.coobird.thumbnailator.Thumbnails;
 
 import com.traveljournal.domain.Image.entity.ImageInfo;
 import com.traveljournal.domain.Image.repository.ImageInfoRepository;
@@ -59,9 +55,9 @@ public class ImageService {
 		byte[] originalImageBytes = imageFile.getBytes();
 		String originalImagePath = uploadToS3(originalImageBytes, fileName, extension, false);
 
-		// 리사이즈된 이미지 생성 및 저장
-		byte[] resizedImageBytes = resizeImage(imageFile);
-		uploadToS3(resizedImageBytes, fileName, extension, true);
+		// // 리사이즈된 이미지 생성 및 저장
+		// byte[] resizedImageBytes = resizeImage(imageFile);
+		// uploadToS3(resizedImageBytes, fileName, extension, true);
 
 		// 이미지 정보 저장
 		saveImageInfo(fileName, originalFilename);
@@ -96,24 +92,24 @@ public class ImageService {
 		}
 	}
 
-	/**
-	 * 이미지 리사이징
-	 */
-	private byte[] resizeImage(MultipartFile imageFile) throws IOException {
-		try (InputStream inputStream = imageFile.getInputStream();
-			 ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-
-			// Thumbnailator 라이브러리를 사용하여 이미지 리사이징
-			Thumbnails.of(inputStream)
-				.size(ImageService.PROFILE_ORIGINAL_SIZE, ImageService.PROFILE_ORIGINAL_SIZE)
-				.keepAspectRatio(true)
-				.outputQuality(0.85) // 이미지 품질 설정 (85%)
-				.outputFormat(FilenameUtil.getExtension(imageFile.getOriginalFilename()))
-				.toOutputStream(outputStream);
-
-			return outputStream.toByteArray();
-		}
-	}
+	// /**
+	//  * 이미지 리사이징
+	//  */
+	// private byte[] resizeImage(MultipartFile imageFile) throws IOException {
+	// 	try (InputStream inputStream = imageFile.getInputStream();
+	// 		 ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+	//
+	// 		// Thumbnailator 라이브러리를 사용하여 이미지 리사이징
+	// 		Thumbnails.of(inputStream)
+	// 			.size(ImageService.PROFILE_ORIGINAL_SIZE, ImageService.PROFILE_ORIGINAL_SIZE)
+	// 			.keepAspectRatio(true)
+	// 			.outputQuality(0.85) // 이미지 품질 설정 (85%)
+	// 			.outputFormat(FilenameUtil.getExtension(imageFile.getOriginalFilename()))
+	// 			.toOutputStream(outputStream);
+	//
+	// 		return outputStream.toByteArray();
+	// 	}
+	// }
 
 	/**
 	 * S3에 이미지 업로드 (SDK V2 방식)

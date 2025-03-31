@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.traveljournal.domain.Image.service.ImageService;
-import com.traveljournal.domain.auth.dto.FirstLoginRequest;
+import com.traveljournal.domain.member.dto.FirstLoginRequest;
 import com.traveljournal.domain.auth.dto.SocialMemberInfo;
 import com.traveljournal.domain.member.entity.AccountScope;
 import com.traveljournal.domain.member.entity.Member;
@@ -81,7 +81,7 @@ public class MemberService {
 			.providerId(socialMemberInfo.getId())
 			.email(socialMemberInfo.getEmail())
 			.nickname(randomNickname)
-			.profileImageUrl(socialMemberInfo.getProfileImageUrl())
+			.profileImageUrl(imageService.getDefaultProfileImageUrl())
 			.accountScope(AccountScope.PUBLIC)
 			.socialProvider(socialProvider)
 			.build();
@@ -95,7 +95,7 @@ public class MemberService {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다."));
 
-		String profileImageUrl = null;
+		String profileImageUrl = member.getProfileImageUrl();
 
 		// 프로필 이미지가 제공된 경우 업로드
 		if (profileImage != null && !profileImage.isEmpty()) {

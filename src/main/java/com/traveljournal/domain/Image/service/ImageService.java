@@ -37,6 +37,9 @@ public class ImageService {
 	@Value("${custom.aws.resized-path}")
 	private String resizedPath;
 
+	@Value("${custom.aws.default-profile-image}")
+	private String defaultProfileImage;
+
 	// 이미지 크기 정의
 	private static final int PROFILE_ORIGINAL_SIZE = 800; // 원본 이미지 최대 크기
 
@@ -142,5 +145,9 @@ public class ImageService {
 		} catch (S3Exception e) {
 			throw new RuntimeException("이미지 업로드 중 오류가 발생했습니다: " + e.awsErrorDetails().errorMessage(), e);
 		}
+	}
+
+	public String getDefaultProfileImageUrl() {
+		return String.format("https://%s.s3.amazonaws.com/%s", bucketName, defaultProfileImage);
 	}
 }

@@ -14,6 +14,7 @@ import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -35,6 +36,7 @@ import com.traveljournal.domain.member.dto.TokenInfo;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.service.MemberService;
+import com.traveljournal.domain.member.service.SocialTokenService;
 import com.traveljournal.domain.member.service.TokenService;
 
 import io.jsonwebtoken.Claims;
@@ -49,6 +51,7 @@ public class AppleService {
 	private final TokenService tokenService;
 	private final MemberService memberService;
 	private final ObjectMapper objectMapper;
+	private final SocialTokenService socialTokenService;
 
 	@Value("${oauth.apple.team-id}")
 	private String teamId;
@@ -84,11 +87,12 @@ public class AppleService {
 		// 애플 토큰 획득
 		AppleTokenResponse appleTokenResponse = getAppleToken(code);
 
-		return processAppleLoginWithIdToken(appleTokenResponse.idToken(), deviceId, socialProvider, platform);
+		return processAppleLoginWithIdToken(appleTokenResponse.idToken(), deviceId, socialProvider, platform,
+			appleTokenResponse.refreshToken());
 	}
 
 	public LoginCombinedResponse processAppleLoginWithIdToken(String idToken, String deviceId,
-		SocialProvider socialProvider, String platform) {
+		SocialProvider socialProvider, String platform, String refreshToken) {
 		// ID 토큰 검증 및 사용자 정보 추출
 		AppleIdTokenInfo appleIdTokenInfo = verifyAndParseIdToken(idToken, platform);
 
@@ -97,6 +101,15 @@ public class AppleService {
 
 		// JWT 토큰 생성 및 저장
 		TokenInfo tokenInfo = createAndSaveTokens(member, deviceId);
+
+		if (refreshToken != null && !refreshToken.isEmpty()) {
+			LocalDateTime expiryDate = LocalDateTime.now().plusMonths(6);
+			socialTokenService.saveOrUpdateSocialToken(
+				member.getId(),
+				refreshToken,
+				socialProvider,
+				expiryDate);
+		}
 
 		return createLoginResponse(member, tokenInfo);
 	}
@@ -163,7 +176,8 @@ public class AppleService {
 
 			// 헤더 파싱
 			String headerJson = new String(Base64.getUrlDecoder().decode(tokenParts[0]));
-			Map<String, String> header = objectMapper.readValue(headerJson, new TypeReference<Map<String, String>>() {});
+			Map<String, String> header = objectMapper.readValue(headerJson, new TypeReference<Map<String, String>>() {
+			});
 			String kid = header.get("kid");
 			String alg = header.get("alg");
 
@@ -235,6 +249,50 @@ public class AppleService {
 		RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(modulus, exponent);
 		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 		return keyFactory.generatePublic(publicKeySpec);
+	}
+
+	/**
+	 * 애플 계정 연결 해제
+	 * 1. 회원의 애플 식별자 조회
+	 * 2. 클라이언트 시크릿 생성
+	 * 3. 애플 서버에 연결 해제 요청
+	 * 4. 사용자 계정에서 애플 연결 정보 삭제
+	 */
+	public void unlinkAppleAccount(Long memberId) {
+		// 회원 정보 조회
+		Member member = memberService.findById(memberId);
+		// 회원의 애플 식별자(sub) 가져오기
+		String appleUserId = member.getProviderId();
+
+		if (appleUserId == null || appleUserId.isEmpty()) {
+			throw new RuntimeException("애플 계정 연결 정보가 없습니다.");
+		}
+
+		try {
+			// 클라이언트 시크릿 생성
+			String clientSecret = createClientSecret();
+
+			// 리프레시 토큰 조회 및 처리
+			Optional<String> refreshTokenOpt = socialTokenService.getSocialRefreshToken(memberId, SocialProvider.APPLE);
+
+			if (refreshTokenOpt.isPresent()) {
+				String refreshToken = refreshTokenOpt.get();
+
+				// 애플 서버에 연결 해제 요청
+				appleClient.revokeToken(
+					servicesId,
+					clientSecret,
+					refreshToken,
+					"refresh_token"
+				);
+
+				// 회원 계정에서 애플 연결 정보 삭제
+				memberService.deleteMember(memberId);
+			}
+
+		} catch (Exception e) {
+			throw new RuntimeException("애플 계정 연결 해제 실패: " + e.getMessage(), e);
+		}
 	}
 
 	private Member getMemberFromIdToken(AppleIdTokenInfo appleIdTokenInfo, SocialProvider socialProvider) {

@@ -74,7 +74,7 @@ public class AuthController {
 	)
 	@PostMapping("/login/{socialProvider}/id-token")
 	public ResponseEntity<LoginResponse> kakaoLoginWithIdToken(
-		@Parameter(description = "카카오에서 반환한 id_Token을 헤더에 담아주세요. Bearer 필요")
+		@Parameter(description = "소셜에서 반환한 id_Token을 헤더에 담아주세요. Bearer 필요")
 		@RequestHeader("Authorization") String authorizationHeader,
 
 		@Parameter(description = "디바이스 ID (선택 사항)")
@@ -84,12 +84,19 @@ public class AuthController {
 		@PathVariable String socialProvider,
 
 		@Parameter(description = "플랫폼 (web, ios, android)")
-		@RequestHeader(value = "X-Platform", defaultValue = "web") String platform
-	) {
+		@RequestHeader(value = "X-Platform", defaultValue = "web") String platform,
+
+		@Parameter(description = "소셜 로그인 Refresh_token")
+		@RequestHeader(value = "X-Refresh-Token", required = false) String refreshToken
+		) {
 		SocialProvider socialProviderEnum = EnumUtils.toSocialProvider(socialProvider);
 
-		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(socialProviderEnum,
-			authorizationHeader, deviceId, platform);
+		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(
+			socialProviderEnum,
+			authorizationHeader,
+			deviceId,
+			platform,
+			refreshToken);
 
 		return ApiResponseHandler.accessTokenResponse(loginCombinedResponse.LoginResponse(),
 			loginCombinedResponse.accessToken());

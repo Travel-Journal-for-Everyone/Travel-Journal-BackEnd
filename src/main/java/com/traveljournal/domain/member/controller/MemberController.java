@@ -5,14 +5,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.traveljournal.domain.member.dto.FirstLoginRequest;
-import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.member.dto.MemberProfileResponse;
+import com.traveljournal.domain.member.dto.ProfileRequest;
+import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.global.data.ApiResponseHandler;
 import com.traveljournal.global.security.util.SecurityUtil;
 
@@ -44,12 +45,12 @@ public class MemberController {
 	)
 	@PostMapping(value = "/complete-first-login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> completeFirstLogin(
-		@RequestPart("firstLoginRequest") FirstLoginRequest firstLoginRequest,
+		@RequestPart("firstLoginRequest") ProfileRequest profileRequest,
 		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage
 	) {
 		Long memberId = SecurityUtil.getCurrentMemberId();
 
-		memberService.completeFirstLogin(memberId, firstLoginRequest, profileImage);
+		memberService.updateProfile(memberId, profileRequest, profileImage);
 		return ApiResponseHandler.createdSuccess("요청이 성공적으로 처리되었습니다.");
 	}
 
@@ -90,5 +91,27 @@ public class MemberController {
 		MemberProfileResponse memberProfileResponse = memberService.getMemberProfile(memberId);
 
 		return ApiResponseHandler.getObjectSuccess(memberProfileResponse);
+	}
+
+	/**
+	 * 첫 로그인 완료 처리
+	 * 사용자 온보딩 완료 시 호출
+	 */
+	@Operation(
+		summary = "Complete First Login",
+		description = """
+			사용자 온보딩이 완료되었을 때 호출됩니다.
+			<br> accountScope = (PUBLIC, FRIENDS, PRIVATE)""",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
+	@PutMapping(value = "/profile/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> updateProfile(
+		@RequestPart("profileRequest") ProfileRequest profileRequest,
+		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage
+	) {
+		Long memberId = SecurityUtil.getCurrentMemberId();
+
+		memberService.updateProfile(memberId, profileRequest, profileImage);
+		return ApiResponseHandler.createdSuccess("요청이 성공적으로 처리되었습니다.");
 	}
 }

@@ -9,8 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.auth.dto.SocialMemberInfo;
-import com.traveljournal.domain.member.dto.FirstLoginRequest;
 import com.traveljournal.domain.member.dto.MemberProfileResponse;
+import com.traveljournal.domain.member.dto.ProfileRequest;
 import com.traveljournal.domain.member.entity.AccountScope;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.entity.SocialProvider;
@@ -96,11 +96,8 @@ public class MemberService {
 			.build();
 	}
 
-	/**
-	 * 첫 로그인 완료 처리
-	 */
 	@Transactional
-	public void completeFirstLogin(Long memberId, FirstLoginRequest request, MultipartFile profileImage) {
+	public void updateProfile(Long memberId, ProfileRequest request, MultipartFile profileImage) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다."));
 
@@ -118,25 +115,13 @@ public class MemberService {
 		}
 
 		// 회원 정보 업데이트
-		member.completeFirstLoginWithProfileImage(
+		member.updateProfile(
 			request.getNickname(),
 			request.getAccountScope(),
 			profileImageUrl
 		);
 
 		memberRepository.save(member);
-	}
-
-	/**
-	 * 회원 프로필 업데이트
-	 */
-	@Transactional
-	public Member updateProfile(Long memberId, String nickname, String profileImageUrl,
-		java.time.LocalDate birthdate, AccountScope accountScope,
-		String phoneNumber) {
-		Member member = findById(memberId);
-		member.updateProfile(nickname, profileImageUrl, birthdate, accountScope, phoneNumber);
-		return member;
 	}
 
 	@Transactional(readOnly = true)

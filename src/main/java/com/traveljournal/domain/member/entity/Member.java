@@ -78,7 +78,7 @@ public class Member {
 		this.isFirstLogin = true;
 	}
 
-	public void completeFirstLoginWithProfileImage(String nickname, AccountScope accountScope, String profileImageUrl) {
+	public void updateProfile(String nickname, AccountScope accountScope, String profileImageUrl) {
 		this.isFirstLogin = false;
 		this.nickname = nickname;
 		this.accountScope = accountScope;
@@ -86,16 +86,4 @@ public class Member {
 			this.profileImageUrl = profileImageUrl;
 		}
 	}
-
-	// 회원 정보 업데이트
-	public void updateProfile(String nickname, String profileImageUrl,
-		LocalDate birthdate, AccountScope accountScope,
-		String phoneNumber) {
-		this.nickname = nickname;
-		this.profileImageUrl = profileImageUrl;
-		this.birthdate = birthdate;
-		this.accountScope = accountScope;
-		this.phoneNumber = phoneNumber;
-	}
-
 }

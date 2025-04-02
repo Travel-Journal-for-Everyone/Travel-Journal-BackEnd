@@ -15,6 +15,7 @@ import com.traveljournal.domain.member.entity.AccountScope;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.repository.MemberRepository;
+import com.traveljournal.domain.member.repository.SocialTokenRepository;
 import com.traveljournal.domain.member.repository.TokenRepository;
 import com.traveljournal.global.exception.ResourceNotFoundException;
 
@@ -33,6 +34,7 @@ public class MemberService {
 	private final MemberRepository memberRepository;
 	private final ImageService imageService;
 	private final TokenRepository tokenRepository;
+	private final SocialTokenRepository socialTokenRepository;
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -184,7 +186,9 @@ public class MemberService {
 		try {
 			Member member = findById(memberId);
 
+
 			tokenRepository.deleteAllByMemberId(memberId);
+			socialTokenRepository.deleteByMemberId(memberId);
 			memberRepository.delete(member);
 
 			memberRepository.flush();

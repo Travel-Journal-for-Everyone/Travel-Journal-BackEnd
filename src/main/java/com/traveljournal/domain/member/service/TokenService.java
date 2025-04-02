@@ -115,16 +115,6 @@ public class TokenService {
 		// 새 액세스 토큰 발급
 		String newAccessToken = jwtTokenProvider.createAccessToken(providerId);
 
-		return MemberTokenResponse.builder()
-			.memberId(member.getId())
-			.email(member.getEmail())
-			.tokenInfo(
-				TokenInfo.builder()
-					.accessToken(newAccessToken)
-					.refreshToken(reissueRequest.refreshToken())
-					.deviceId(deviceId)
-					.build()
-			)
-			.build();
+		return MemberTokenResponse.of(member.getId(), newAccessToken, reissueRequest.refreshToken(), deviceId);
 	}
 }

@@ -1,6 +1,5 @@
 package com.traveljournal.domain.member.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -26,9 +25,7 @@ public class Member {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String email;
-
-	@Column(nullable = false, unique = true, length = 255)
+	@Column(nullable = false, unique = true)
 	private String providerId;
 
 	@Column(nullable = false, length = 50)
@@ -37,20 +34,12 @@ public class Member {
 	@Column(length = 255)
 	private String profileImageUrl;
 
-	private LocalDate birthdate;
-
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private AccountScope accountScope;
 
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createAt;
-
-	@Column(nullable = false)
-	private Boolean isDeleted = false;
-
-	@Column(length = 20)
-	private String phoneNumber;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -64,17 +53,13 @@ public class Member {
 	}
 
 	@Builder
-	public Member(String providerId, String email, String nickname, String profileImageUrl, LocalDate birthdate,
-		AccountScope accountScope, String phoneNumber, SocialProvider socialProvider) {
+	public Member(String providerId, String nickname, String profileImageUrl,
+		AccountScope accountScope, SocialProvider socialProvider) {
 		this.providerId = providerId;
-		this.email = email;
 		this.nickname = nickname;
 		this.profileImageUrl = profileImageUrl;
-		this.birthdate = birthdate;
 		this.accountScope = accountScope != null ? accountScope : AccountScope.PUBLIC;
-		this.phoneNumber = phoneNumber;
 		this.socialProvider = socialProvider;
-		this.isDeleted = false;
 		this.isFirstLogin = true;
 	}
 

@@ -40,14 +40,6 @@ public class MemberService {
 	private EntityManager entityManager;
 
 	/**
-	 * 이메일로 회원 조회
-	 */
-	@Transactional(readOnly = true)
-	public Optional<Member> findByEmail(String email) {
-		return memberRepository.findByEmail(email);
-	}
-
-	/**
 	 * 소셜 고유 회원번호로 조회
 	 */
 	@Transactional(readOnly = true)
@@ -88,7 +80,6 @@ public class MemberService {
 
 		return Member.builder()
 			.providerId(socialMemberInfo.getId())
-			.email(socialMemberInfo.getEmail())
 			.nickname(randomNickname)
 			.profileImageUrl(imageService.getDefaultProfileImageUrl())
 			.accountScope(AccountScope.PUBLIC)

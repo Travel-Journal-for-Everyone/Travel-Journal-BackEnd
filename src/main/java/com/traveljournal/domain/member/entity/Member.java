@@ -63,12 +63,16 @@ public class Member {
 		this.isFirstLogin = true;
 	}
 
-	public void updateProfile(String nickname, AccountScope accountScope, String profileImageUrl) {
+	public void updateProfile(String nickname, AccountScope accountScope, String profileImageUrl, boolean memberDefaultImage) {
 		this.isFirstLogin = false;
 		this.nickname = nickname;
 		this.accountScope = accountScope;
-		if (profileImageUrl != null) {
+		if (profileImageUrl != null && !profileImageUrl.isEmpty() && !profileImageUrl.equals("null") && !memberDefaultImage) {
 			this.profileImageUrl = profileImageUrl;
 		}
+		else if (memberDefaultImage) {
+			this.profileImageUrl = profileImageUrl;
+		}
+
 	}
 }

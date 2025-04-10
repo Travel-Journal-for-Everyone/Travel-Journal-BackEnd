@@ -95,7 +95,7 @@ public class MemberService {
 		String profileImageUrl = member.getProfileImageUrl();
 
 		// 프로필 이미지가 제공된 경우 업로드
-		if (profileImage != null && !profileImage.isEmpty()) {
+		if (profileImage != null && !profileImage.isEmpty() && !request.isMemberDefaultImage()) {
 			try {
 				profileImageUrl = imageService.uploadProfileImage(profileImage, memberId);
 			} catch (IOException e) {
@@ -103,13 +103,16 @@ public class MemberService {
 			} catch (java.io.IOException e) {
 				throw new RuntimeException(e);
 			}
+		} else if(request.isMemberDefaultImage()) {
+			profileImageUrl = imageService.getDefaultProfileImageUrl();
 		}
 
 		// 회원 정보 업데이트
 		member.updateProfile(
 			request.getNickname(),
 			request.getAccountScope(),
-			profileImageUrl
+			profileImageUrl,
+			request.isMemberDefaultImage()
 		);
 
 		memberRepository.save(member);

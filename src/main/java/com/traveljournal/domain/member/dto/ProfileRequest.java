@@ -16,6 +16,8 @@ public class ProfileRequest {
 	@Schema(description = "계정 공개 범위")
 	private AccountScope accountScope;
 
+	@Schema(description = "기본 이미지")
+	private boolean memberDefaultImage;
 	// 기본 생성자
 	public ProfileRequest() {}
 

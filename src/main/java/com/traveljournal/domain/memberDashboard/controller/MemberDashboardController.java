@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/members")
-@Tag(name = "memberDashboard", description = "사용자 대시보드 API")
+@Tag(name = "member dashboard API", description = "사용자 대시보드 API")
 public class MemberDashboardController {
 	private final MemberDashboardService memberDashboardService;
 

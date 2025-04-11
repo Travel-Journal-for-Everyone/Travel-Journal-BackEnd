@@ -120,6 +120,11 @@ public class AuthController {
 		return ApiResponseHandler.deletedSuccess("로그아웃 성공");
 	}
 
+	@Operation(
+		summary = "Unlink",
+		description = "특정 회원의 연동을 해제합니다.",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
 	@DeleteMapping("/{socialProvider}/unlink")
 	public ResponseEntity<?> unlinkSocialAccount(
 		@Parameter(description = "소셜로그인 제공자 (kakao, google, apple)")

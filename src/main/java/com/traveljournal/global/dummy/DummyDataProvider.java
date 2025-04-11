@@ -329,6 +329,186 @@ public class DummyDataProvider {
 				"2025.04.01",
 				"2025.04.07"
 			));
+
+			dummyData.add(new JournalListResponse(
+				31L,
+				Arrays.asList("제주도", "중문", "해변"),
+				"중문 해변에서의 여름 휴가",
+				3L,
+				4L,
+				"2025.07.15",
+				"2025.07.19"
+			));
+
+			dummyData.add(new JournalListResponse(
+				32L,
+				Arrays.asList("제주도", "애월", "카페"),
+				"애월 해안도로 카페 투어",
+				2L,
+				3L,
+				"2025.05.10",
+				"2025.05.13"
+			));
+
+			dummyData.add(new JournalListResponse(
+				33L,
+				Arrays.asList("제주도", "협재", "해수욕장"),
+				"에메랄드빛 협재해수욕장 여행",
+				2L,
+				3L,
+				"2025.08.01",
+				"2025.08.04"
+			));
+
+			dummyData.add(new JournalListResponse(
+				34L,
+				Arrays.asList("제주도", "한림", "수목원"),
+				"한림공원과 협재해변 당일치기",
+				0L,
+				1L,
+				"2025.06.15",
+				"2025.06.15"
+			));
+
+			dummyData.add(new JournalListResponse(
+				35L,
+				Arrays.asList("제주도", "비자림", "산책"),
+				"비자림 숲길 산책과 힐링",
+				1L,
+				2L,
+				"2025.09.20",
+				"2025.09.22"
+			));
+
+			dummyData.add(new JournalListResponse(
+				36L,
+				Arrays.asList("제주도", "만장굴", "탐험"),
+				"만장굴 탐험과 김녕 해변",
+				1L,
+				2L,
+				"2025.04.15",
+				"2025.04.17"
+			));
+
+			dummyData.add(new JournalListResponse(
+				37L,
+				Arrays.asList("제주도", "마라도", "최남단"),
+				"대한민국 최남단 마라도 여행",
+				2L,
+				3L,
+				"2025.05.25",
+				"2025.05.28"
+			));
+
+			dummyData.add(new JournalListResponse(
+				38L,
+				Arrays.asList("제주도", "천지연폭포", "야경"),
+				"천지연폭포 야경과 서귀포 맛집",
+				2L,
+				3L,
+				"2025.02.10",
+				"2025.02.13"
+			));
+
+			dummyData.add(new JournalListResponse(
+				39L,
+				Arrays.asList("제주도", "섭지코지", "드라마"),
+				"드라마 촬영지 섭지코지 투어",
+				1L,
+				2L,
+				"2025.03.05",
+				"2025.03.07"
+			));
+
+			dummyData.add(new JournalListResponse(
+				40L,
+				Arrays.asList("제주도", "카멜리아힐", "꽃"),
+				"카멜리아힐 동백꽃 구경",
+				1L,
+				2L,
+				"2025.01.15",
+				"2025.01.17"
+			));
+
+			dummyData.add(new JournalListResponse(
+				41L,
+				Arrays.asList("제주도", "사려니숲길", "트레킹"),
+				"사려니숲길 트레킹과 치유",
+				2L,
+				3L,
+				"2025.06.05",
+				"2025.06.08"
+			));
+
+			dummyData.add(new JournalListResponse(
+				42L,
+				Arrays.asList("제주도", "쇠소깍", "카약"),
+				"쇠소깍 카약 체험과 주상절리",
+				1L,
+				2L,
+				"2025.07.25",
+				"2025.07.27"
+			));
+
+			dummyData.add(new JournalListResponse(
+				43L,
+				Arrays.asList("제주도", "오설록", "녹차"),
+				"오설록 녹차밭과 이니스프리",
+				1L,
+				2L,
+				"2025.04.20",
+				"2025.04.22"
+			));
+
+			dummyData.add(new JournalListResponse(
+				44L,
+				Arrays.asList("제주도", "아쿠아플라넷", "수족관"),
+				"아쿠아플라넷 제주 가족 나들이",
+				2L,
+				3L,
+				"2025.08.15",
+				"2025.08.18"
+			));
+
+			dummyData.add(new JournalListResponse(
+				45L,
+				Arrays.asList("제주도", "용두암", "일출"),
+				"용두암에서 본 제주 일출",
+				1L,
+				2L,
+				"2025.01.01",
+				"2025.01.03"
+			));
+
+			dummyData.add(new JournalListResponse(
+				46L,
+				Arrays.asList("제주도", "우도", "자전거"),
+				"우도 자전거 일주 여행",
+				1L,
+				2L,
+				"2025.05.05",
+				"2025.05.07"
+			));
+
+			dummyData.add(new JournalListResponse(
+				47L,
+				Arrays.asList("제주도", "함덕", "해수욕장"),
+				"함덕 해수욕장 서핑 체험",
+				2L,
+				3L,
+				"2025.07.05",
+				"2025.07.08"
+			));
+
+			dummyData.add(new JournalListResponse(
+				48L,
+				Arrays.asList("제주도", "산방산", "산책"),
+				"산방산과 용머리해안 트레킹",
+				1L,
+				2L,
+				"2025.09.10",
+				"2025.09.12"
+			));
 		}
 
 		return dummyData;

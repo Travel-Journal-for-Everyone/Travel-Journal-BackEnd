@@ -23,7 +23,7 @@ public class JournalController {
 
 	@GetMapping("/region/{regionName}")
 	public ResponseEntity<Page<JournalListResponse>> getJournalsByRegionPaged(
-		@PathVariable String memberId,
+		@PathVariable Long memberId,
 		@PathVariable String regionName,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {

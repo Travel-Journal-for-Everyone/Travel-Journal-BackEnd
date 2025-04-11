@@ -15,7 +15,7 @@ import com.traveljournal.global.data.ApiResponseHandler;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/v1/journals")
+@RequestMapping("/v1/members/{memberId}/journals")
 @RequiredArgsConstructor
 public class JournalController {
 
@@ -23,6 +23,7 @@ public class JournalController {
 
 	@GetMapping("/region/{regionName}")
 	public ResponseEntity<Page<JournalListResponse>> getJournalsByRegionPaged(
+		@PathVariable String memberId,
 		@PathVariable String regionName,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {

@@ -173,59 +173,6 @@ public class DummyDataProvider {
 			));
 		}
 
-		// 경상도 지역 더미 데이터
-		else if ("경상도".equals(regionName)) {
-			dummyData.add(new JournalListResponse(
-				16L,
-				Arrays.asList("경상도", "부산", "해운대"),
-				"바다가 주구장창 보고싶던 부산 여행",
-				2L,
-				3L,
-				"2025.02.05",
-				"2025.02.08"
-			));
-
-			dummyData.add(new JournalListResponse(
-				17L,
-				Arrays.asList("경상도", "경주", "불국사"),
-				"남자 혼자 떠나는 가을 경주 여행",
-				2L,
-				3L,
-				"2024.10.15",
-				"2024.10.18"
-			));
-
-			dummyData.add(new JournalListResponse(
-				18L,
-				Arrays.asList("경상도", "안동", "가족여행"),
-				"가을 느낌 한가득! 울긋불긋 안동",
-				1L,
-				2L,
-				"2024.11.01",
-				"2024.11.03"
-			));
-
-			dummyData.add(new JournalListResponse(
-				19L,
-				Arrays.asList("경상도", "맛집"),
-				"맛집 찾기는 언제 멈춰야하나?",
-				3L,
-				4L,
-				"2025.01.24",
-				"2025.01.28"
-			));
-
-			dummyData.add(new JournalListResponse(
-				20L,
-				Arrays.asList("경상도", "거제도", "힐링여행"),
-				"바다에서 가을 물결 여행",
-				2L,
-				3L,
-				"2024.10.01",
-				"2024.10.12"
-			));
-		}
-
 		// 전라도 지역 더미 데이터
 		else if ("전라도".equals(regionName)) {
 			dummyData.add(new JournalListResponse(
@@ -608,37 +555,6 @@ public class DummyDataProvider {
 				12L,
 				"보령 머드축제",
 				"충청도",
-				imageUrl
-			));
-		}
-
-		// 경상도 지역 더미 데이터
-		else if ("경상도".equals(regionName)) {
-			dummyData.add(new PlaceListResponse(
-				13L,
-				"부산 해운대",
-				"경상도",
-				imageUrl
-			));
-
-			dummyData.add(new PlaceListResponse(
-				14L,
-				"경주 불국사",
-				"경상도",
-				imageUrl
-			));
-
-			dummyData.add(new PlaceListResponse(
-				15L,
-				"안동 하회마을",
-				"경상도",
-				imageUrl
-			));
-
-			dummyData.add(new PlaceListResponse(
-				16L,
-				"거제도 바다",
-				"경상도",
 				imageUrl
 			));
 		}

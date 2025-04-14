@@ -35,9 +35,7 @@ public class PlaceController {
 	public ResponseEntity<Page<PlaceListResponse>> getPlacesByRegionPaged(
 		@PathVariable Long memberId,
 		@PathVariable String regionName,
-		@PageableDefault(size = 10) Pageable pageable) {
-		// @RequestParam(defaultValue = "0") int page,
-		// @RequestParam(defaultValue = "10") int size) {
+		@PageableDefault Pageable pageable) {
 		return ApiResponseHandler.getObjectSuccess(placeService.getPlacesByRegionWithPagion(regionName, pageable));
 	}
 }

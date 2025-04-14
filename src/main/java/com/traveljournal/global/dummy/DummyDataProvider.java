@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.traveljournal.domain.journal.dto.JournalListResponse;
+import com.traveljournal.domain.place.dto.PlaceListResponse;
 
 @Component
 public class DummyDataProvider {
@@ -508,6 +509,291 @@ public class DummyDataProvider {
 				2L,
 				"2025.09.10",
 				"2025.09.12"
+			));
+		}
+
+		return dummyData;
+	}
+
+	public List<PlaceListResponse> getDummyPlacesByRegion(String regionName) {
+		List<PlaceListResponse> dummyData = new ArrayList<>();
+		String imageUrl = "https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjFfMTEw%2FMDAxNzQyNTU5MjY0OTkz.US8DxCfatYon23fMlPjPlqGIvpK8Zd8SIP3BuNFyGmUg.LUZS2bZBQ1aJuHyVI52EjhzHykDFewCj4mpJCeoV0G0g.JPEG%2F2025%25BA%25A2%25B2%25C9%25B0%25B3%25C8%25AD%25BD%25C3%25B1%25E2IMG_2503-009.JPG&type=sc960_832";
+
+		// 수도권(서울, 경기, 인천) 지역 더미 데이터
+		if ("수도권".equals(regionName)) {
+			dummyData.add(new PlaceListResponse(
+				1L,
+				"서울 타워",
+				"서울",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				2L,
+				"경복궁",
+				"서울",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				3L,
+				"인천 차이나타운",
+				"인천",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				4L,
+				"수원 화성",
+				"경기도",
+				imageUrl
+			));
+		}
+
+		// 강원도 지역 더미 데이터
+		else if ("강원도".equals(regionName)) {
+			dummyData.add(new PlaceListResponse(
+				5L,
+				"속초 해변",
+				"강원도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				6L,
+				"평창 스키장",
+				"강원도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				7L,
+				"춘천 남이섬",
+				"강원도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				8L,
+				"양양 서핑 스팟",
+				"강원도",
+				imageUrl
+			));
+		}
+
+		// 충청도 지역 더미 데이터
+		else if ("충청도".equals(regionName)) {
+			dummyData.add(new PlaceListResponse(
+				9L,
+				"대전 과학관",
+				"충청도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				10L,
+				"공주 백제문화제",
+				"충청도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				11L,
+				"천안 독립기념관",
+				"충청도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				12L,
+				"보령 머드축제",
+				"충청도",
+				imageUrl
+			));
+		}
+
+		// 경상도 지역 더미 데이터
+		else if ("경상도".equals(regionName)) {
+			dummyData.add(new PlaceListResponse(
+				13L,
+				"부산 해운대",
+				"경상도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				14L,
+				"경주 불국사",
+				"경상도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				15L,
+				"안동 하회마을",
+				"경상도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				16L,
+				"거제도 바다",
+				"경상도",
+				imageUrl
+			));
+		}
+
+		// 전라도 지역 더미 데이터
+		else if ("전라도".equals(regionName)) {
+			dummyData.add(new PlaceListResponse(
+				17L,
+				"전주 한옥마을",
+				"전라도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				18L,
+				"여수 밤바다",
+				"전라도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				19L,
+				"순천만 습지",
+				"전라도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				20L,
+				"담양 죽녹원",
+				"전라도",
+				imageUrl
+			));
+		}
+
+		// 제주도 지역 더미 데이터 (기존 10개 + 7개 추가)
+		else if ("제주도".equals(regionName)) {
+			dummyData.add(new PlaceListResponse(
+				21L,
+				"성산일출봉",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				22L,
+				"한라산",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				23L,
+				"협재 해수욕장",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				24L,
+				"우도",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				25L,
+				"만장굴",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				26L,
+				"천지연폭포",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				27L,
+				"오설록 티 뮤지엄",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				28L,
+				"카멜리아힐",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				29L,
+				"사려니숲길",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				30L,
+				"섭지코지",
+				"제주도",
+				imageUrl
+			));
+
+			// 추가 7개 장소
+			dummyData.add(new PlaceListResponse(
+				31L,
+				"정모시쉼터",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				32L,
+				"교래자연휴양림",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				33L,
+				"비자림",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				34L,
+				"용두암",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				35L,
+				"주상절리대",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				36L,
+				"제주민속촌",
+				"제주도",
+				imageUrl
+			));
+
+			dummyData.add(new PlaceListResponse(
+				37L,
+				"에코랜드",
+				"제주도",
+				imageUrl
 			));
 		}
 

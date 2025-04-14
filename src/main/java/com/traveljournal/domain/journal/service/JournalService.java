@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.traveljournal.domain.journal.dto.JournalListResponse;
 import com.traveljournal.global.dummy.DummyDataProvider;
-import com.traveljournal.global.security.util.PaginationUtils;
+import com.traveljournal.global.util.PaginationUtils;
 
 import lombok.RequiredArgsConstructor;
 

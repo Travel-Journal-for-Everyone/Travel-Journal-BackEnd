@@ -1,6 +1,6 @@
-package com.traveljournal.global.security.util;
+package com.traveljournal.global.util;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -17,11 +17,15 @@ public class PaginationUtils {
 	 * @return 페이지네이션 처리된 Page 객체
 	 */
 	public static <T> Page<T> getPagedList(List<T> allData, Pageable pageable) {
-		int start = (int)pageable.getOffset();
-		int end = Math.min(start + pageable.getPageSize(), allData.size());
+		if (allData == null || allData.isEmpty() || pageable == null) {
+			return new PageImpl<>(Collections.emptyList(), Pageable.unpaged(), 0);
+		}
 
-		if (start > allData.size()) {
-			return new PageImpl<>(new ArrayList<>(), pageable, allData.size());
+		int start = (int) pageable.getOffset();
+		int end = Math.min((start + pageable.getPageSize()), allData.size());
+
+		if (start >= allData.size()) {
+			return new PageImpl<>(Collections.emptyList(), pageable, allData.size());
 		}
 
 		List<T> pageData = allData.subList(start, end);

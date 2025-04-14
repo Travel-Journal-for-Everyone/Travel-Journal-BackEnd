@@ -5,9 +5,8 @@ plugins {
     id 'org.asciidoctor.jvm.convert' version '3.3.2' // Asciidoctor 플러그인 추가
 }
 
-ext {
-    snippetsDir = file('build/generated-snippets') // REST Docs snippets 파일 경로
-}
+// 프로젝트 속성 정의 - ext 블록 대신 직접 정의
+def snippetsDir = file('build/generated-snippets')  // REST Docs snippets 파일 경로
 
 group = 'com.traveljournal'
 version = '0.0.1-SNAPSHOT'
@@ -19,10 +18,10 @@ java {
 }
 
 configurations {
+    asciidoctorExtension
     compileOnly {
         extendsFrom annotationProcessor
     }
-    asciidoctorExt
 }
 
 repositories {
@@ -56,11 +55,11 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    // Spring Cloud AWS https://mvnrepository.com/artifact/io.awspring.cloud/spring-cloud-aws-starter
-    implementation group: 'io.awspring.cloud', name: 'spring-cloud-aws-starter', version: '3.3.0'
+    // Spring Cloud AWS
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.3.0'
 
     // Spring REST Docs
-    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+    asciidoctorExtension 'org.springframework.restdocs:spring-restdocs-asciidoctor'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
@@ -73,11 +72,11 @@ dependencies {
     implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
-    // JWKSET 관련  ( 구글 )
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.1.2'  // 최신 버전으로 변경
+    // JWKSET 관련 (구글)
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.1.2'
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.20.0'
     implementation 'com.google.http-client:google-http-client-gson:1.41.0'
-    implementation 'com.google.api-client:google-api-client:1.34.0'  // Google API 클라이언트
+    implementation 'com.google.api-client:google-api-client:1.35.0' // Google API 클라이언트
 
     // AWS SDK V2 BOM
     implementation platform('software.amazon.awssdk:bom:2.31.3')
@@ -92,13 +91,15 @@ dependencies {
     implementation 'net.coobird:thumbnailator:0.4.20'
 }
 
-test {
-    useJUnitPlatform() // JUnit 5 사용
-    outputs.dir snippetsDir // REST Docs snippets 디렉터리 생성
+// 현대적인 태스크 구성 방식
+tasks.named('test') {
+    useJUnitPlatform()
+    outputs.dir snippetsDir
 }
 
-asciidoctor {
-    inputs.dir snippetsDir // snippets 디렉토리 경로 연결
-    configurations 'asciidoctorExt'
-    dependsOn test // Tests 실행 후 Asciidoctor 빌드
+tasks.named('asciidoctor') {
+    inputs.dir snippetsDir
+    classpath = configurations.asciidoctorExtension
+    dependsOn test
 }
+

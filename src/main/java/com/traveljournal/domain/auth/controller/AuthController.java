@@ -85,7 +85,7 @@ public class AuthController {
 		@Parameter(description = "플랫폼 (web, ios, android)")
 		@RequestHeader(value = "X-Platform", defaultValue = "web") String platform,
 
-		@Parameter(description = "소셜 로그인 Refresh_token")
+		@Parameter(description = "소셜 로그인 Refresh_token, Bearer 필요")
 		@RequestHeader(value = "X-Refresh-Token", required = false) String refreshToken
 		) {
 		SocialProvider socialProviderEnum = EnumUtils.toSocialProvider(socialProvider);

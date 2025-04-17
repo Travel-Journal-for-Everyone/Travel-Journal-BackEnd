@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.traveljournal.domain.member.entity.Member;
+import com.traveljournal.domain.member.entity.Platform;
 import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.entity.SocialToken;
 import com.traveljournal.domain.member.repository.SocialTokenRepository;
@@ -23,9 +24,10 @@ public class SocialTokenService {
 
 	@Transactional
 	public void saveOrUpdateSocialToken(Long memberId, String refreshToken,
-		SocialProvider provider, LocalDateTime expiryDate) {
+		SocialProvider provider, LocalDateTime expiryDate, String platformString) {
 		Member member = memberService.findById(memberId);
 
+		Platform platform = Platform.valueOf(platformString.toUpperCase());
 		// 기존 토큰이 있는지 확인 후 업데이트 또는 생성
 		Optional<SocialToken> existingToken =
 			socialTokenRepository.findByMemberIdAndProvider(memberId, provider);
@@ -33,7 +35,7 @@ public class SocialTokenService {
 		if (existingToken.isPresent()) {
 			// 기존 토큰 업데이트
 			SocialToken token = existingToken.get();
-			token.updateRefreshToken(refreshToken, expiryDate);
+			token.updateRefreshToken(refreshToken, expiryDate, platform);
 		} else {
 			// 새 토큰 생성
 			SocialToken token = SocialToken.builder()
@@ -42,6 +44,7 @@ public class SocialTokenService {
 				.provider(provider)
 				.expiryDate(expiryDate)
 				.providerId(member.getProviderId())
+				.platform(platform)
 				.build();
 			socialTokenRepository.save(token);
 		}
@@ -55,5 +58,10 @@ public class SocialTokenService {
 		return socialTokenRepository.findByMemberIdAndProvider(memberId, provider)
 			.filter(token -> !token.isExpired())
 			.map(SocialToken::getRefreshToken);
+	}
+
+	public Optional<SocialToken> getSocialToken(Long memberId, SocialProvider provider) {
+		return socialTokenRepository.findByMemberIdAndProvider(memberId, provider)
+			.filter(token -> !token.isExpired());
 	}
 }

@@ -48,20 +48,26 @@ public class SocialToken {
 
 	private LocalDateTime lastUpdatedAt;
 
+	@Enumerated(EnumType.STRING)
+	@Column(length = 20)
+	private Platform platform; // WEB, IOS, ANDROID 등
+
 	@Builder
-	public SocialToken(Member member, String refreshToken, SocialProvider provider, LocalDateTime expiryDate, String providerId) {
+	public SocialToken(Member member, String refreshToken, SocialProvider provider, LocalDateTime expiryDate, String providerId, Platform platform) {
 		this.member = member;
 		this.refreshToken = refreshToken;
 		this.provider = provider;
 		this.expiryDate = expiryDate;
 		this.lastUpdatedAt = LocalDateTime.now();
 		this.providerId = providerId;
+		this.platform = platform;
 	}
 
-	public void updateRefreshToken(String refreshToken, LocalDateTime expiryDate) {
+	public void updateRefreshToken(String refreshToken, LocalDateTime expiryDate, Platform platform) {
 		this.refreshToken = refreshToken;
 		this.expiryDate = expiryDate;
 		this.lastUpdatedAt = LocalDateTime.now();
+		this.platform = platform;
 	}
 
 	public boolean isExpired() {

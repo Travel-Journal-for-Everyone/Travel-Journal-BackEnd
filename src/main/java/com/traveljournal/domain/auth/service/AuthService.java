@@ -30,7 +30,7 @@ public class AuthService {
 		return switch (socialProvider) {
 			case KAKAO -> kakaoService.processKakaoLoginWithCode(code, deviceId, socialProvider);
 			case APPLE -> appleService.processAppleLoginWithCode(code, deviceId, socialProvider, platform);
-			case GOOGLE -> googleService.processGoogleLoginWithCode(code, deviceId, socialProvider);
+			case GOOGLE -> googleService.processGoogleLoginWithCode(code, deviceId, socialProvider, platform);
 			default -> throw new UnsupportedOperationException("지원되지 않는 소셜 로그인 제공자입니다.");
 		};
 	}
@@ -48,7 +48,7 @@ public class AuthService {
 		return switch (socialProvider) {
 			case KAKAO -> kakaoService.processKakaoLoginWithIdToken(idToken, deviceId, socialProvider);
 			case APPLE -> appleService.processAppleLoginWithIdToken(idToken, deviceId, socialProvider, platform, refreshToken);
-			case GOOGLE -> googleService.processGoogleLoginWithIdToken(idToken, deviceId, socialProvider, refreshToken);
+			case GOOGLE -> googleService.processGoogleLoginWithIdToken(idToken, deviceId, socialProvider, platform, refreshToken);
 			default -> throw new UnsupportedOperationException("지원되지 않는 소셜 로그인 제공자입니다.");
 		};
 	}

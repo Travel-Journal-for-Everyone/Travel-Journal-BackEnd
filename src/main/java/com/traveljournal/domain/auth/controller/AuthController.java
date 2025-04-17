@@ -44,7 +44,7 @@ public class AuthController {
 	)
 	@GetMapping("/login/{socialProvider}/callback")
 	public ResponseEntity<LoginResponse> kakaoCallback(
-		@Parameter(description = "카카오에서 반환한 인증 코드")
+		@Parameter(description = "소셜로그인에서 반환한 인증 코드")
 		@RequestParam String code,
 
 		@Parameter(description = "디바이스 ID (선택 사항)")

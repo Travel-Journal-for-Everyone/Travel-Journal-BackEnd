@@ -1,10 +1,10 @@
 package com.traveljournal.domain.auth.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
-import lombok.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.traveljournal.domain.auth.dto.LoginCombinedResponse;
 import com.traveljournal.domain.auth.dto.LoginResponse;
@@ -20,10 +20,6 @@ import com.traveljournal.domain.member.service.SocialTokenService;
 import com.traveljournal.domain.member.service.TokenService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.client.RestTemplate;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,15 +33,15 @@ public class GoogleService {
 
 
 	public LoginCombinedResponse processGoogleLoginWithCode(String code, String deviceId,
-		SocialProvider socialProvider) {
+		SocialProvider socialProvider, String platform) {
 		// 구글 토큰 획득
 		GoogleTokenResponse googleTokenResponse = googleClient.getGoogleToken(code);
 
-		return processGoogleLoginWithIdToken(googleTokenResponse.id_token(), deviceId, socialProvider, googleTokenResponse.refresh_token());
+		return processGoogleLoginWithIdToken(googleTokenResponse.id_token(), deviceId, socialProvider, googleTokenResponse.refresh_token(), platform);
 	}
 
 	public LoginCombinedResponse processGoogleLoginWithIdToken(String idToken, String deviceId,
-		SocialProvider socialProvider, String refreshToken) {
+		SocialProvider socialProvider, String refreshToken, String platform) {
 		// ID Token 으로 구글 사용자 정보 가져오기
 		GoogleIdTokenInfo googleIdTokenInfo = googleClient.getGoogleMemberInfoFromIdToken(idToken);
 
@@ -61,7 +57,8 @@ public class GoogleService {
 				member.getId(),
 				refreshToken,
 				socialProvider,
-				expiryDate);
+				expiryDate,
+				platform);
 		}
 
 		// 로그인 응답 생성

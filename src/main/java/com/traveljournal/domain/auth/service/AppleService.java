@@ -34,7 +34,9 @@ import com.traveljournal.domain.auth.dto.apple.AppleTokenResponse;
 import com.traveljournal.domain.auth.util.AppleClient;
 import com.traveljournal.domain.member.dto.TokenInfo;
 import com.traveljournal.domain.member.entity.Member;
+import com.traveljournal.domain.member.entity.Platform;
 import com.traveljournal.domain.member.entity.SocialProvider;
+import com.traveljournal.domain.member.entity.SocialToken;
 import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.member.service.SocialTokenService;
 import com.traveljournal.domain.member.service.TokenService;
@@ -85,7 +87,7 @@ public class AppleService {
 	public LoginCombinedResponse processAppleLoginWithCode(String code, String deviceId, SocialProvider socialProvider,
 		String platform) {
 		// 애플 토큰 획득
-		AppleTokenResponse appleTokenResponse = getAppleToken(code);
+		AppleTokenResponse appleTokenResponse = getAppleToken(code, platform);
 
 		return processAppleLoginWithIdToken(appleTokenResponse.idToken(), deviceId, socialProvider, platform,
 			appleTokenResponse.refreshToken());
@@ -108,17 +110,27 @@ public class AppleService {
 				member.getId(),
 				refreshToken,
 				socialProvider,
-				expiryDate);
+				expiryDate,
+				platform);
 		}
 
 		return createLoginResponse(member, tokenInfo);
 	}
 
 	// 애플 토큰 요청
-	public AppleTokenResponse getAppleToken(String code) {
-		String clientSecret = createClientSecret();
+	public AppleTokenResponse getAppleToken(String code, String platform) {
+
+		String clientId;
+		if ("ios".equals(platform)) {
+			clientId = iosBundleId; // iOS 번들 ID
+		} else if ("android".equals(platform)) {
+			clientId = androidBundleId; // (필요시) 안드로이드 번들 ID
+		} else {
+			clientId = servicesId; // 웹용 Service ID
+		}
+		String clientSecret = createClientSecret(clientId);
 		return appleClient.appleAuth(
-			servicesId,
+			clientId,
 			code,
 			"authorization_code",
 			clientSecret,
@@ -127,7 +139,7 @@ public class AppleService {
 	}
 
 	// JWT 클라이언트 시크릿 생성
-	private String createClientSecret() {
+	private String createClientSecret(String clientId) {
 		Date expirationDate = Date.from(
 			LocalDateTime.now().plusMinutes(5)
 				.atZone(ZoneId.systemDefault())
@@ -141,7 +153,7 @@ public class AppleService {
 			.setIssuedAt(new Date())
 			.setExpiration(expirationDate)
 			.setAudience("https://appleid.apple.com")
-			.setSubject(servicesId)
+			.setSubject(clientId)
 			.signWith(getPrivateKey(), SignatureAlgorithm.ES256)
 			.compact();
 	}
@@ -259,28 +271,40 @@ public class AppleService {
 	 * 4. 사용자 계정에서 애플 연결 정보 삭제
 	 */
 	public void unlinkAppleAccount(Long memberId) {
-		// 회원 정보 조회
-		Member member = memberService.findById(memberId);
-		// 회원의 애플 식별자(sub) 가져오기
-		String appleUserId = member.getProviderId();
+
+		Optional<SocialToken> socialTokenOpt = socialTokenService.getSocialToken(memberId, SocialProvider.APPLE);
+
+		if (socialTokenOpt.isEmpty()) {
+			throw new RuntimeException("애플 소셜 토큰 정보가 없습니다.");
+		}
+
+		SocialToken socialToken = socialTokenOpt.get();
+		String appleUserId = socialToken.getMember().getProviderId();
+		String refreshToken = socialToken.getRefreshToken();
+		Platform platform = socialToken.getPlatform();
 
 		if (appleUserId == null || appleUserId.isEmpty()) {
 			throw new RuntimeException("애플 계정 연결 정보가 없습니다.");
 		}
 
+		String clientId;
+		if (platform == Platform.IOS) {
+			clientId = iosBundleId;
+		}
+		else if (platform == Platform.ANDROID) {
+			clientId = androidBundleId;
+		}
+		else {
+			clientId = servicesId;
+		}
+
 		try {
 			// 클라이언트 시크릿 생성
-			String clientSecret = createClientSecret();
-
-			// 리프레시 토큰 조회 및 처리
-			Optional<String> refreshTokenOpt = socialTokenService.getSocialRefreshToken(memberId, SocialProvider.APPLE);
-
-			if (refreshTokenOpt.isPresent()) {
-				String refreshToken = refreshTokenOpt.get();
+			String clientSecret = createClientSecret(clientId);
 
 				// 애플 서버에 연결 해제 요청
 				appleClient.revokeToken(
-					servicesId,
+					clientId,
 					clientSecret,
 					refreshToken,
 					"refresh_token"
@@ -288,8 +312,6 @@ public class AppleService {
 
 				// 회원 계정에서 애플 연결 정보 삭제
 				memberService.deleteMember(memberId);
-			}
-
 		} catch (Exception e) {
 			throw new RuntimeException("애플 계정 연결 해제 실패: " + e.getMessage(), e);
 		}

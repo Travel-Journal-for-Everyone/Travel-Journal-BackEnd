@@ -32,10 +32,22 @@ public class JournalController {
 		security = @SecurityRequirement(name = "bearer-key")
 	)
 	@GetMapping("/members/{memberId}/journals/region/{regionName}")
-	public ResponseEntity<Page<JournalListResponse>> getJournalsByRegionPaged(
+	public ResponseEntity<Page<JournalListResponse>> findJournalsByRegionPaged(
 		@PathVariable Long memberId,
 		@PathVariable String regionName,
 		@PageableDefault Pageable pageable) {
-		return ApiResponseHandler.getObjectSuccess(journalService.getJournalsByRegionWithPaging(regionName, pageable));
+		return ApiResponseHandler.getObjectSuccess(journalService.findJournalsByRegionWithPaging(regionName, pageable));
+	}
+
+	@Operation(
+		summary = "회원의 전체 여행일지 조회",
+		description = "특정 회원의 전체 여행일지 리스트를 페이징하여 반환합니다.",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
+	@GetMapping("/members/{memberId}/journals")
+	public ResponseEntity<Page<JournalListResponse>> findJournalsByMember(
+		@PathVariable Long memberId,
+		@PageableDefault Pageable pageable) {
+		return ApiResponseHandler.getObjectSuccess(journalService.findAllJournalsByMemberId(pageable));
 	}
 }

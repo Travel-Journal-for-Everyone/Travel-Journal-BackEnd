@@ -32,10 +32,22 @@ public class PlaceController {
 		security = @SecurityRequirement(name = "bearer-key")
 	)
 	@GetMapping("/members/{memberId}/places/region/{regionName}")
-	public ResponseEntity<Page<PlaceListResponse>> getPlacesByRegionPaged(
+	public ResponseEntity<Page<PlaceListResponse>> findPlacesByRegionPaged(
 		@PathVariable Long memberId,
 		@PathVariable String regionName,
 		@PageableDefault Pageable pageable) {
-		return ApiResponseHandler.getObjectSuccess(placeService.getPlacesByRegionWithPagion(regionName, pageable));
+		return ApiResponseHandler.getObjectSuccess(placeService.findPlacesByRegionWithPagion(regionName, pageable));
+	}
+
+	@Operation(
+		summary = "회원의 전체 플레이스 조회",
+		description = "특정 회원의 전체 플레이스 리스트를 페이징하여 반환합니다.",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
+	@GetMapping("/members/{memberId}/places")
+	public ResponseEntity<Page<PlaceListResponse>> findJournalsByMember(
+		@PathVariable Long memberId,
+		@PageableDefault Pageable pageable) {
+		return ApiResponseHandler.getObjectSuccess(placeService.findAllPlacesByMemberId(pageable));
 	}
 }

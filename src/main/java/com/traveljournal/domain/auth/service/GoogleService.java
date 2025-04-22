@@ -37,11 +37,11 @@ public class GoogleService {
 		// 구글 토큰 획득
 		GoogleTokenResponse googleTokenResponse = googleClient.getGoogleToken(code);
 
-		return processGoogleLoginWithIdToken(googleTokenResponse.id_token(), deviceId, socialProvider, googleTokenResponse.refresh_token(), platform);
+		return processGoogleLoginWithIdToken(googleTokenResponse.id_token(), deviceId, socialProvider, platform, googleTokenResponse.refresh_token());
 	}
 
 	public LoginCombinedResponse processGoogleLoginWithIdToken(String idToken, String deviceId,
-		SocialProvider socialProvider, String refreshToken, String platform) {
+		SocialProvider socialProvider, String platform, String refreshToken) {
 		// ID Token 으로 구글 사용자 정보 가져오기
 		GoogleIdTokenInfo googleIdTokenInfo = googleClient.getGoogleMemberInfoFromIdToken(idToken);
 

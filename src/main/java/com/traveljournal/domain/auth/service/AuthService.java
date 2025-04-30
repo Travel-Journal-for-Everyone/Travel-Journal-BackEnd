@@ -5,8 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.traveljournal.domain.auth.dto.LoginCombinedResponse;
 import com.traveljournal.domain.member.entity.SocialProvider;
-import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.member.service.TokenService;
+import com.traveljournal.global.exception.BadRequestException;
 import com.traveljournal.global.security.jwt.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
@@ -22,16 +22,17 @@ public class AuthService {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final AppleService appleService;
 	private final GoogleService googleService;
-	private final MemberService memberService;
 
 	@Transactional
 	public LoginCombinedResponse handleLoginWithCode(SocialProvider socialProvider, String code, String deviceId,
 		String platform) {
+
+		validateCode(code);
+
 		return switch (socialProvider) {
 			case KAKAO -> kakaoService.processKakaoLoginWithCode(code, deviceId, socialProvider);
 			case APPLE -> appleService.processAppleLoginWithCode(code, deviceId, socialProvider, platform);
 			case GOOGLE -> googleService.processGoogleLoginWithCode(code, deviceId, socialProvider, platform);
-			default -> throw new UnsupportedOperationException("지원되지 않는 소셜 로그인 제공자입니다.");
 		};
 	}
 
@@ -49,7 +50,6 @@ public class AuthService {
 			case KAKAO -> kakaoService.processKakaoLoginWithIdToken(idToken, deviceId, socialProvider);
 			case APPLE -> appleService.processAppleLoginWithIdToken(idToken, deviceId, socialProvider, platform, refreshToken);
 			case GOOGLE -> googleService.processGoogleLoginWithIdToken(idToken, deviceId, socialProvider, platform, refreshToken);
-			default -> throw new UnsupportedOperationException("지원되지 않는 소셜 로그인 제공자입니다.");
 		};
 	}
 
@@ -66,8 +66,6 @@ public class AuthService {
 			case GOOGLE:
 				googleService.unlinkGoogleAccount(memberId);
 				break;
-			default:
-				throw new UnsupportedOperationException("지원되지 않는 소셜 로그인 제공자입니다.");
 		}
 	}
 
@@ -80,4 +78,9 @@ public class AuthService {
 		tokenService.deleteToken(memberId, deviceId);
 	}
 
+	private void validateCode(String code) {
+		if(code == null || code.isEmpty()) {
+			throw new BadRequestException("인증 코드 : " + code);
+		}
+	}
 }

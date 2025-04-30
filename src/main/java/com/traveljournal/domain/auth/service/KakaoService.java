@@ -63,7 +63,6 @@ public class KakaoService {
 	 */
 	public void unlinkKakaoAccount(Long memberId) {
 		try {
-			log.info("카카오 계정 연결 끊기 시작: memberId={}", memberId);
 
 			// 회원 정보 조회
 			Member member = memberService.findById(memberId);
@@ -74,9 +73,7 @@ public class KakaoService {
 			// 회원 정보 삭제
 			memberService.deleteMember(memberId);
 
-			log.info("카카오 계정 연결 끊기 완료: memberId={}", memberId);
 		} catch (Exception e) {
-			log.error("카카오 계정 연결 끊기 실패: {}", e.getMessage());
 			throw new ExternalApiException("카카오 계정 연결 끊기에 실패했습니다: " + e.getMessage());
 		}
 	}

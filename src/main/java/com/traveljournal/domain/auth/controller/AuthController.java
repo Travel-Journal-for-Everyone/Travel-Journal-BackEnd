@@ -54,9 +54,19 @@ public class AuthController {
 			content = @Content(
 				mediaType = "text/plain",
 				examples = {
-					@ExampleObject(name = "지원하지 않는 소셜 로그인 제공자", value = "지원하지 않는 소셜 로그인 제공자입니다 : gogle"),
-					@ExampleObject(name = "유효하지 않은 Authorization Header", description = "Bearer이 빠져있거나 잘못되었을 경우",value = "유효한 Authorization 헤더가 필요합니다. : authorizationHeader"),
-					@ExampleObject(name = "인증 코드가 비어있거나 null", description = "비어있을때 예시", value = "인증 코드 : ")
+					@ExampleObject(
+						name = "지원하지 않는 소셜 로그인 제공자",
+						value = "지원하지 않는 소셜 로그인 제공자입니다 : gogle"
+					),
+					@ExampleObject(
+						name = "유효하지 않은 Authorization Header",
+						description = "Bearer이 빠져있거나 잘못되었을 경우",
+						value = "유효한 Authorization 헤더가 필요합니다. : authorizationHeader"
+					),
+					@ExampleObject(
+						name = "인증 코드가 비어있거나 null",
+						description = "비어있을때 예시",
+						value = "인증 코드 : ")
 				}
 			)
 		),
@@ -66,8 +76,14 @@ public class AuthController {
 			content = @Content(
 				mediaType = "text/plain",
 				examples = {
-					@ExampleObject(name = "id_token 비어있거나 null", value = "id_token이 비어있거나 null입니다. : idToken"),
-					@ExampleObject(name = "id_token 정보 중 sub가 존재하지 않을때", value = "id_token 정보중 회원번호(sub)가 없습니다.")
+					@ExampleObject(
+						name = "id_token 비어있거나 null",
+						value = "id_token이 비어있거나 null입니다. : idToken"
+					),
+					@ExampleObject(
+						name = "id_token 정보 중 sub가 존재하지 않을때",
+						value = "id_token 정보중 회원번호(sub)가 없습니다."
+					)
 				}
 			)
 		),
@@ -77,8 +93,15 @@ public class AuthController {
 			content = @Content(
 				mediaType = "text/plain",
 				examples = {
-					@ExampleObject(name = "토큰 발급 실패", description = "유효하지 않은 토큰일 경우 토큰 서버에서 HTTP 400 상태코드와 함께 발급 실패", value = "카카오 토큰 발급에 실패했습니다: 400  on POST request for \"https://kauth.kakao.com/oauth/token\": \"{\"error\":\"invalid_grant\",\"error_description\":\"authorization code not found for code=eee\",\"error_code\":\"KOE320\"}\""),
-					@ExampleObject(name = "id_token 파싱 실패", value = "id_token 파싱에 실패했습니다 / 파싱 실패 메시지")
+					@ExampleObject(
+						name = "토큰 발급 실패",
+						description = "유효하지 않은 토큰일 경우 토큰 서버에서 HTTP 400 상태코드와 함께 발급 실패",
+						value = "카카오 토큰 발급에 실패했습니다: 400  on POST request for \"https://kauth.kakao.com/oauth/token\": \"{\"error\":\"invalid_grant\",\"error_description\":\"authorization code not found for code=eee\",\"error_code\":\"KOE320\"}\""
+					),
+					@ExampleObject(
+						name = "id_token 파싱 실패",
+						value = "id_token 파싱에 실패했습니다 : Invalid JWS header: Invalid JSON: Unexpected End Of File position 62: null"
+					)
 				}
 			)
 		)
@@ -120,8 +143,15 @@ public class AuthController {
 			content = @Content(
 				mediaType = "text/plain",
 				examples = {
-					@ExampleObject(name = "지원하지 않는 소셜 로그인 제공자", value = "지원하지 않는 소셜 로그인 제공자입니다 : gogle"),
-					@ExampleObject(name = "유효하지 않은 Authorization Header", description = "Bearer이 빠져있거나 잘못되었을 경우",value = "유효한 Authorization 헤더가 필요합니다. : authorizationHeader")
+					@ExampleObject(
+						name = "지원하지 않는 소셜 로그인 제공자",
+						value = "지원하지 않는 소셜 로그인 제공자입니다 : gogle"
+					),
+					@ExampleObject(
+						name = "유효하지 않은 Authorization Header",
+						description = "Bearer이 빠져있거나 잘못되었을 경우",
+						value = "유효한 Authorization 헤더가 필요합니다. : authorizationHeader"
+					)
 				}
 			)
 		),
@@ -131,8 +161,14 @@ public class AuthController {
 			content = @Content(
 				mediaType = "text/plain",
 				examples = {
-					@ExampleObject(name = "id_token 비어있거나 null", value = "id_token이 비어있거나 null입니다. : idToken"),
-					@ExampleObject(name = "id_token 정보 중 sub가 존재하지 않을때", value = "id_token 정보중 회원번호(sub)가 없습니다.")
+					@ExampleObject(
+						name = "id_token 비어있거나 null",
+						value = "id_token이 비어있거나 null입니다. : idToken"
+					),
+					@ExampleObject(
+						name = "id_token 정보 중 sub가 존재하지 않을때",
+						value = "id_token 정보중 회원번호(sub)가 없습니다."
+					)
 				}
 			)
 		),
@@ -142,8 +178,15 @@ public class AuthController {
 			content = @Content(
 				mediaType = "text/plain",
 				examples = {
-					@ExampleObject(name = "토큰 발급 실패", description = "유효하지 않은 토큰일 경우 토큰 서버에서 HTTP 400 상태코드와 함께 발급 실패", value = "카카오 토큰 발급에 실패했습니다: 400  on POST request for \"https://kauth.kakao.com/oauth/token\": \"{\"error\":\"invalid_grant\",\"error_description\":\"authorization code not found for code=eee\",\"error_code\":\"KOE320\"}\""),
-					@ExampleObject(name = "id_token 파싱 실패", value = "id_token 파싱에 실패했습니다 / 파싱 실패 메시지")
+					@ExampleObject(
+						name = "토큰 발급 실패",
+						description = "유효하지 않은 토큰일 경우 토큰 서버에서 HTTP 400 상태코드와 함께 발급 실패",
+						value = "카카오 토큰 발급에 실패했습니다: 400  on POST request for \"https://kauth.kakao.com/oauth/token\": \"{\"error\":\"invalid_grant\",\"error_description\":\"authorization code not found for code=eee\",\"error_code\":\"KOE320\"}\""
+					),
+					@ExampleObject(
+						name = "id_token 파싱 실패",
+						value = "id_token 파싱에 실패했습니다 : Invalid JWS header: Invalid JSON: Unexpected End Of File position 62: null"
+					)
 				}
 			)
 		)
@@ -186,6 +229,17 @@ public class AuthController {
 		summary = "Logout",
 		description = "특정 장치에서 로그아웃을 처리하고 해당 장치의 토큰을 삭제합니다.",
 		security = @SecurityRequirement(name = "bearer-key")
+	)
+	@ApiResponse(
+		responseCode = "200",
+		description = "성공",
+		content = @Content(
+			mediaType = "text/plain",
+			examples = @ExampleObject(
+				name = "로그아웃 성공",
+				value = "로그아웃 성공"
+			)
+		)
 	)
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(

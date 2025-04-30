@@ -20,6 +20,10 @@ import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +46,44 @@ public class AuthController {
 		summary = "Social Login callback",
 		description = "인증 코드를 받아 로그인/회원가입 후 헤더에 액세스 토큰을 발급합니다."
 	)
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "성공"),
+		@ApiResponse(
+			responseCode = "400",
+			description = "잘못된 요청",
+			content = @Content(
+				mediaType = "text/plain",
+				examples = {
+					@ExampleObject(name = "지원하지 않는 소셜 로그인 제공자", value = "지원하지 않는 소셜 로그인 제공자입니다 : gogle"),
+					@ExampleObject(name = "인증 코드가 비어있거나 null", description = "비어있을때 예시", value = "인증 코드 : ")
+				}
+			)
+		),
+		@ApiResponse(
+			responseCode = "401",
+			description = "인증 정보가 잘못되었거나, 인증이 필요한 상황",
+			content = @Content(
+				mediaType = "text/plain",
+				examples = {
+					@ExampleObject(name = "id_token 비어있거나 null", value = "id_token이 비어있거나 null입니다. : idToken"),
+					@ExampleObject(name = "id_token 정보 중 sub가 존재하지 않을때", value = "id_token 정보중 회원번호(sub)가 없습니다.")
+				}
+			)
+		),
+		@ApiResponse(
+			responseCode = "503",
+			description = "외부 API 요청 실패",
+			content = @Content(
+				mediaType = "text/plain",
+				examples = {
+					@ExampleObject(name = "토큰 발급 실패", description = "유효하지 않은 토큰일 경우 토큰 서버에서 HTTP 400 상태코드와 함께 발급 실패", value = "카카오 토큰 발급에 실패했습니다: 400  on POST request for \"https://kauth.kakao.com/oauth/token\": \"{\"error\":\"invalid_grant\",\"error_description\":\"authorization code not found for code=eee\",\"error_code\":\"KOE320\"}\""),
+					@ExampleObject(name = "id_token 파싱 실패", value = "id_token 파싱에 실패했습니다 / 파싱 실패 메시지")
+				}
+			)
+		)
+	})
 	@GetMapping("/login/{socialProvider}/callback")
-	public ResponseEntity<LoginResponse> kakaoCallback(
+	public ResponseEntity<LoginResponse> socialCallback(
 		@Parameter(description = "소셜로그인에서 반환한 인증 코드")
 		@RequestParam String code,
 
@@ -72,7 +112,7 @@ public class AuthController {
 			<br> X-Platform 헤더에 (web, ios, android)를 포함해야 합니다."""
 	)
 	@PostMapping("/login/{socialProvider}/id-token")
-	public ResponseEntity<LoginResponse> kakaoLoginWithIdToken(
+	public ResponseEntity<LoginResponse> socialLoginWithIdToken(
 		@Parameter(description = "소셜에서 반환한 id_Token을 헤더에 담아주세요. Bearer 필요")
 		@RequestHeader("Authorization") String authorizationHeader,
 
@@ -87,7 +127,7 @@ public class AuthController {
 
 		@Parameter(description = "소셜 로그인 Refresh_token, Bearer 필요")
 		@RequestHeader(value = "X-Refresh-Token", required = false) String refreshToken
-		) {
+	) {
 		SocialProvider socialProviderEnum = EnumUtils.toSocialProvider(socialProvider);
 
 		LoginCombinedResponse loginCombinedResponse = authService.handleLoginWithIdToken(

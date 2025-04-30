@@ -22,4 +22,9 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleBadRequest(BadRequestException ex) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
 	}
+
+	@ExceptionHandler(ExternalApiException.class)
+	public ResponseEntity<String> handleExternalApi(ExternalApiException ex) {
+		return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ex.getMessage());
+	}
 }

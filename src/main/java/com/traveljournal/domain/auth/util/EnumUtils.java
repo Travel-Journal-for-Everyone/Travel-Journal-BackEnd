@@ -8,7 +8,7 @@ public class EnumUtils {
 		try {
 			return SocialProvider.valueOf(socialProviderStr.trim().toUpperCase());
 		} catch (IllegalArgumentException e) {
-			throw new BadRequestException("지원하지 않는 소숄 로그인 제공자입니다 : " + socialProviderStr);
+			throw new BadRequestException("지원하지 않는 소셜 로그인 제공자입니다 : " + socialProviderStr);
 		}
 	}
 }

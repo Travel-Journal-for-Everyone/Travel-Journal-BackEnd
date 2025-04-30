@@ -55,6 +55,7 @@ public class AuthController {
 				mediaType = "text/plain",
 				examples = {
 					@ExampleObject(name = "지원하지 않는 소셜 로그인 제공자", value = "지원하지 않는 소셜 로그인 제공자입니다 : gogle"),
+					@ExampleObject(name = "유효하지 않은 Authorization Header", description = "Bearer이 빠져있거나 잘못되었을 경우",value = "유효한 Authorization 헤더가 필요합니다. : authorizationHeader"),
 					@ExampleObject(name = "인증 코드가 비어있거나 null", description = "비어있을때 예시", value = "인증 코드 : ")
 				}
 			)

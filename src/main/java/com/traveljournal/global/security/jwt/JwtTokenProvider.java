@@ -20,6 +20,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -106,6 +107,9 @@ public class JwtTokenProvider {
 	 *  DENIED 검증 실패
 	 */
 	public JwtValidateStatus getTokenValidationStatus(String token) {
+		if (token == null || token.isBlank()) {
+			return JwtValidateStatus.EMPTY;
+		}
 		try {
 			Jwts.parserBuilder()
 				.setSigningKey(secretKey)
@@ -114,8 +118,12 @@ public class JwtTokenProvider {
 			return JwtValidateStatus.ACCEPTED;
 		} catch (ExpiredJwtException e) {
 			return JwtValidateStatus.EXPIRED;
+		} catch (UnsupportedJwtException e) {
+			return JwtValidateStatus.UNSUPPORTED;
 		} catch (JwtException e) {
-			return JwtValidateStatus.DENIED;
+			return JwtValidateStatus.INVALID;
+		} catch (Exception e) {
+			return JwtValidateStatus.ERROR;
 		}
 	}
 

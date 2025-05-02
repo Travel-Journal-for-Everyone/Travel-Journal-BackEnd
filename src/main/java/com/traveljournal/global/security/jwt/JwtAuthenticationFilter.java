@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.traveljournal.global.data.JwtValidateStatus;
+import com.traveljournal.global.exception.UserNotFoundException;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -37,24 +38,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		// 토큰이 있는 경우에만 처리
 		if (authorization != null) {
-			// Bearer 토큰 추출
 			String token = jwtTokenProvider.resolveToken(authorization);
 
 			if (token != null) {
-				// 토큰 유효성 검사
-				JwtValidateStatus status = jwtTokenProvider.getTokenValidationStatus(token);
+				try {
+					JwtValidateStatus status = jwtTokenProvider.getTokenValidationStatus(token);
 
-				if (status == JwtValidateStatus.ACCEPTED) {
-					try {
-						// 인증 정보 설정
+					if (status == JwtValidateStatus.ACCEPTED) {
 						jwtTokenProvider.setAuthentication(token);
-						log.debug("토큰 인증 성공");
-					} catch (Exception e) {
-						log.error("토큰 처리 중 에러 발생: {}", e.getMessage());
+						log.error("토큰 인증 성공");
+					} else if (status == JwtValidateStatus.EXPIRED) {
+						request.setAttribute("exception", "TOKEN_EXPIRED");
+						log.error("토큰 만료");
+						SecurityContextHolder.clearContext();
+					} else if (status == JwtValidateStatus.INVALID) {
+						request.setAttribute("exception", "TOKEN_INVALID");
+						log.error("유효하지 않은 토큰");
+						SecurityContextHolder.clearContext();
+					} else {
+						request.setAttribute("exception", "TOKEN_UNKNOWN");
+						log.error("알 수 없는 토큰 오류");
 						SecurityContextHolder.clearContext();
 					}
-				} else {
-					log.debug("유효하지 않은 토큰: {}", status);
+				} catch (UserNotFoundException e) {
+					request.setAttribute("exception", "USER_NOT_FOUND");
+					log.debug("사용자를 찾을 수 없습니다: {}", e.getMessage());
+					SecurityContextHolder.clearContext();
+				} catch (Exception e) {
+					log.error("토큰 처리 중 에러 발생: {}", e.getMessage());
+					request.setAttribute("exception", "TOKEN_ERROR");
+					SecurityContextHolder.clearContext();
 				}
 			}
 		}

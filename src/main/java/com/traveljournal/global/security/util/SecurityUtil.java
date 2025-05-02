@@ -3,6 +3,7 @@ package com.traveljournal.global.security.util;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.traveljournal.global.exception.UnauthorizedException;
 import com.traveljournal.global.security.service.CustomUserDetails;
 
 /**
@@ -19,7 +20,7 @@ public class SecurityUtil {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 		if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
-			throw new IllegalStateException("올바른 사용자 정보가 아닙니다.");
+			throw new UnauthorizedException("올바른 사용자 정보가 아닙니다.");
 		}
 		return userDetails.getMemberId();
 	}

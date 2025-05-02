@@ -27,4 +27,9 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleExternalApi(ExternalApiException ex) {
 		return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ex.getMessage());
 	}
+
+	@ExceptionHandler(MemberDeleteException.class)
+	public ResponseEntity<String> handleMemberDelete(MemberDeleteException ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+	}
 }

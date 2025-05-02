@@ -13,7 +13,6 @@ import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.member.service.TokenService;
-import com.traveljournal.global.exception.ExternalApiException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +25,7 @@ public class KakaoService {
 	private final TokenService tokenService;
 	private final KakaoClient kakaoClient;
 	private final MemberService memberService;
+
 	/**
 	 * 카카오 로그인 처리
 	 * 1. 카카오 인증 코드로 액세스 토큰 요청
@@ -34,7 +34,8 @@ public class KakaoService {
 	 * 4. JWT 토큰 생성 및 저장
 	 * 5. 로그인 응답 생성
 	 */
-	public LoginCombinedResponse processKakaoLoginWithCode(String code, String deviceId, SocialProvider socialProvider) {
+	public LoginCombinedResponse processKakaoLoginWithCode(String code, String deviceId,
+		SocialProvider socialProvider) {
 
 		// 카카오 토큰 획득
 		KakaoTokenResponse kakaoTokenResponse = kakaoClient.getKakaoToken(code);
@@ -42,7 +43,8 @@ public class KakaoService {
 		return processKakaoLoginWithIdToken(kakaoTokenResponse.id_token(), deviceId, socialProvider);
 	}
 
-	public LoginCombinedResponse processKakaoLoginWithIdToken(String idToken, String deviceId, SocialProvider socialProvider) {
+	public LoginCombinedResponse processKakaoLoginWithIdToken(String idToken, String deviceId,
+		SocialProvider socialProvider) {
 
 		// ID Token으로 카카오 사용자 정보 가져오기
 		KakaoIdTokenInfo kakaoIdTokenInfo = kakaoClient.getKakaoMemberInfoFromIdToken(idToken);
@@ -62,22 +64,16 @@ public class KakaoService {
 	 * 2. 회원 정보 삭제
 	 */
 	public void unlinkKakaoAccount(Long memberId) {
-		try {
 
-			// 회원 정보 조회
-			Member member = memberService.findById(memberId);
+		// 회원 정보 조회
+		Member member = memberService.findById(memberId);
 
-			// 카카오 API를 통해 연결 끊기
-			kakaoClient.unlinkKakaoUser(member.getProviderId());
+		// 카카오 API를 통해 연결 끊기
+		kakaoClient.unlinkKakaoUser(member.getProviderId());
 
-			// 회원 정보 삭제
-			memberService.deleteMember(memberId);
-
-		} catch (Exception e) {
-			throw new ExternalApiException("카카오 계정 연결 끊기에 실패했습니다: " + e.getMessage());
-		}
+		// 회원 정보 삭제
+		memberService.deleteMember(memberId);
 	}
-
 
 	private Member getMemberFromIdToken(KakaoIdTokenInfo kakaoIdTokenInfo, SocialProvider socialProvider) {
 		return memberService.findOrCreateMember(

@@ -230,17 +230,33 @@ public class AuthController {
 		description = "특정 장치에서 로그아웃을 처리하고 해당 장치의 토큰을 삭제합니다.",
 		security = @SecurityRequirement(name = "bearer-key")
 	)
-	@ApiResponse(
-		responseCode = "200",
-		description = "성공",
-		content = @Content(
-			mediaType = "text/plain",
-			examples = @ExampleObject(
-				name = "로그아웃 성공",
-				value = "로그아웃 성공"
+	@ApiResponses(
+		{
+			@ApiResponse(
+				responseCode = "200",
+				description = "성공",
+				content = @Content(
+					mediaType = "text/plain",
+					examples = @ExampleObject(
+						name = "로그아웃 성공",
+						value = "로그아웃 성공"
+					)
+				)
+			),
+			@ApiResponse(
+				responseCode = "401",
+				description = "인증 정보가 잘못되었거나, 인증이 필요한 상황",
+				content = @Content(
+					mediaType = "text/plain",
+					examples = {
+						@ExampleObject(
+							name = "올바른 사용자 정보가 아닙니다.",
+							value = "올바른 사용자 정보가 아닙니다."
+						)
+					}
+				)
 			)
-		)
-	)
+		})
 	@PostMapping("/logout")
 	public ResponseEntity<?> logout(
 		@Parameter(description = "로그아웃 할 member의 device_id를 입력해주세요.")
@@ -256,6 +272,89 @@ public class AuthController {
 		description = "특정 회원의 연동을 해제합니다.",
 		security = @SecurityRequirement(name = "bearer-key")
 	)
+	@ApiResponses(
+		{
+			@ApiResponse(
+				responseCode = "200",
+				description = "성공",
+				content = @Content(
+					mediaType = "text/plain",
+					examples = @ExampleObject(
+						name = "연결끊기 성공",
+						value = "연결끊기 성공"
+					)
+				)
+			),
+			@ApiResponse(
+				responseCode = "400",
+				description = "잘못된 요청",
+				content = @Content(
+					mediaType = "text/plain",
+					examples = {
+						@ExampleObject(
+							name = "지원하지 않는 소셜 로그인 제공자",
+							value = "지원하지 않는 소셜 로그인 제공자입니다 : gogle"
+						),
+						@ExampleObject(
+							name = "카카오 회원번호가 비어 있습니다.",
+							value = "카카오 회원번호가 비어 있습니다."
+						)
+					}
+				)
+			),
+			@ApiResponse(
+				responseCode = "401",
+				description = "인증 정보가 잘못되었거나, 인증이 필요한 상황",
+				content = @Content(
+					mediaType = "text/plain",
+					examples = {
+						@ExampleObject(
+							name = "올바른 사용자 정보가 아닙니다.",
+							value = "올바른 사용자 정보가 아닙니다."
+						)
+					}
+				)
+			),
+			@ApiResponse(
+				responseCode = "404",
+				description = "리소스가 존재하지 않을때",
+				content = @Content(
+					mediaType = "text/plain",
+					examples = {
+						@ExampleObject(
+							name = "회원을 찾을 수 없습니다.",
+							value = "회원을 찾을 수 없습니다. ID: memberId"
+						)
+					}
+				)
+			),
+			@ApiResponse(
+				responseCode = "503",
+				description = "외부 API 요청 실패",
+				content = @Content(
+					mediaType = "text/plain",
+					examples = {
+						@ExampleObject(
+							name = "카카오 연결 끊기 실패",
+							value = "카카오 연결 끊기에 실패했습니다: e.getMessage()"
+						)
+					}
+				)
+			),
+			@ApiResponse(
+				responseCode = "500",
+				description = "서버 내부 오류",
+				content = @Content(
+					mediaType = "text/plain",
+					examples = {
+						@ExampleObject(
+							name = "회원 삭제 중 오류가 발생했습니다.",
+							value = "회원 삭제 중 오류가 발생했습니다."
+						)
+					}
+				)
+			)
+		})
 	@DeleteMapping("/{socialProvider}/unlink")
 	public ResponseEntity<?> unlinkSocialAccount(
 		@Parameter(description = "소셜로그인 제공자 (kakao, google, apple)")

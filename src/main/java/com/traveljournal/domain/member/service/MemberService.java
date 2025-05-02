@@ -17,6 +17,7 @@ import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.repository.MemberRepository;
 import com.traveljournal.domain.member.repository.SocialTokenRepository;
 import com.traveljournal.domain.member.repository.TokenRepository;
+import com.traveljournal.global.exception.MemberDeleteException;
 import com.traveljournal.global.exception.ResourceNotFoundException;
 
 import io.jsonwebtoken.io.IOException;
@@ -173,10 +174,8 @@ public class MemberService {
 			memberRepository.flush();
 			entityManager.clear();
 
-			log.info("회원 삭제 완료. ID: {}", memberId);
 		} catch (Exception e) {
-			log.error("회원 삭제 중 오류 발생. ID: {}", memberId, e);
-			throw new RuntimeException("회원 삭제 중 오류가 발생했습니다.", e);
+			throw new MemberDeleteException("회원 삭제 중 오류가 발생했습니다.", e);
 		}
 	}
 }

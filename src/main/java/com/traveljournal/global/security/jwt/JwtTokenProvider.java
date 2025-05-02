@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.traveljournal.global.config.AppConfig;
 import com.traveljournal.global.data.JwtValidateStatus;
+import com.traveljournal.global.exception.BadRequestException;
 import com.traveljournal.global.security.service.CustomUserDetailsService;
 
 import io.jsonwebtoken.Claims;
@@ -147,7 +148,7 @@ public class JwtTokenProvider {
 
 	private void validateAuthorizationHeader(String authorizationHeader) {
 		if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-			throw new IllegalArgumentException("유효한 Authorization 헤더가 필요합니다.");
+			throw new BadRequestException("유효한 Authorization 헤더가 필요합니다. : " + authorizationHeader);
 		}
 	}
 

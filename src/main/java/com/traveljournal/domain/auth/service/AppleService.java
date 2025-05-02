@@ -40,6 +40,9 @@ import com.traveljournal.domain.member.entity.SocialToken;
 import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.member.service.SocialTokenService;
 import com.traveljournal.domain.member.service.TokenService;
+import com.traveljournal.global.exception.BadRequestException;
+import com.traveljournal.global.exception.ExternalApiException;
+import com.traveljournal.global.exception.UnauthorizedException;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -129,13 +132,23 @@ public class AppleService {
 			clientId = servicesId; // 웹용 Service ID
 		}
 		String clientSecret = createClientSecret(clientId);
-		return appleClient.appleAuth(
-			clientId,
-			code,
-			"authorization_code",
-			clientSecret,
-			redirectUri
-		);
+		try {
+			return appleClient.appleAuth(
+				clientId,
+				code,
+				"authorization_code",
+				clientSecret,
+				redirectUri
+			);
+		} catch (feign.FeignException.BadRequest e) {
+			throw new BadRequestException("애플 인증 코드가 잘못되었습니다:" + e.contentUTF8());
+		} catch (feign.FeignException.Unauthorized e) {
+			throw new UnauthorizedException("애플 인증이 실패했습니다: " + e.contentUTF8());
+		} catch (feign.FeignException e) {
+			throw new ExternalApiException("애플 서버 통신 오류: " + e.contentUTF8());
+		} catch (Exception e) {
+			throw new ExternalApiException("애플 토큰 요청 중 알 수 없는 오류: " + e.getMessage());
+		}
 	}
 
 	// JWT 클라이언트 시크릿 생성
@@ -290,11 +303,9 @@ public class AppleService {
 		String clientId;
 		if (platform == Platform.IOS) {
 			clientId = iosBundleId;
-		}
-		else if (platform == Platform.ANDROID) {
+		} else if (platform == Platform.ANDROID) {
 			clientId = androidBundleId;
-		}
-		else {
+		} else {
 			clientId = servicesId;
 		}
 
@@ -302,16 +313,16 @@ public class AppleService {
 			// 클라이언트 시크릿 생성
 			String clientSecret = createClientSecret(clientId);
 
-				// 애플 서버에 연결 해제 요청
-				appleClient.revokeToken(
-					clientId,
-					clientSecret,
-					refreshToken,
-					"refresh_token"
-				);
+			// 애플 서버에 연결 해제 요청
+			appleClient.revokeToken(
+				clientId,
+				clientSecret,
+				refreshToken,
+				"refresh_token"
+			);
 
-				// 회원 계정에서 애플 연결 정보 삭제
-				memberService.deleteMember(memberId);
+			// 회원 계정에서 애플 연결 정보 삭제
+			memberService.deleteMember(memberId);
 		} catch (Exception e) {
 			throw new RuntimeException("애플 계정 연결 해제 실패: " + e.getMessage(), e);
 		}

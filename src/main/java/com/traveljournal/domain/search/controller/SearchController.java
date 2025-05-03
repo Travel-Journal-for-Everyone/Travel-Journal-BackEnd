@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.traveljournal.domain.place.dto.PlaceListResponse;
 import com.traveljournal.domain.search.dto.MemberSearchResponse;
 import com.traveljournal.domain.search.service.MemberSearchService;
+import com.traveljournal.domain.search.service.PlaceSearchService;
 import com.traveljournal.global.data.ApiResponseHandler;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,17 +29,17 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Search API", description = "사용자 검색")
 public class SearchController {
 
-    private final MemberSearchService memberSearchService;
+	private final MemberSearchService memberSearchService;
+	private final PlaceSearchService placeSearchService;
 
-    @GetMapping("/members")
-    @Operation(
-            summary = "사용자 검색",
-            description = "사용자가 입력한 키워드로 다른 사용자를 검색합니다.",
-            security = @SecurityRequirement(name = "bearer-key"))
-    public ResponseEntity<Page<MemberSearchResponse>> searchMembers(
-            @RequestParam @NotBlank(message = "검색어는 비어 있을 수 없습니다.") String keyword,
-            @PageableDefault(sort = "nickname") Pageable pageable)
-    {
+	@GetMapping("/members")
+	@Operation(
+		summary = "사용자 검색",
+		description = "사용자가 입력한 키워드로 다른 사용자를 검색합니다.",
+		security = @SecurityRequirement(name = "bearer-key"))
+	public ResponseEntity<Page<MemberSearchResponse>> searchMembers(
+		@RequestParam @NotBlank(message = "검색어는 비어 있을 수 없습니다.") String keyword,
+		@PageableDefault(sort = "nickname") Pageable pageable) {
 /*
         // 키워드가 비어 있을 경우, 409 상태 코드로 실패 메시지 반환
         if (keyword == null || keyword.isEmpty()) {
@@ -45,8 +47,23 @@ public class SearchController {
         }
 
  */
-        Page<MemberSearchResponse> result = memberSearchService.searchMembers(keyword, pageable);
+		Page<MemberSearchResponse> result = memberSearchService.searchMembers(keyword, pageable);
 
-        return ApiResponseHandler.getObjectSuccess(result);
-    }
+		return ApiResponseHandler.getObjectSuccess(result);
+	}
+
+	@Operation(
+		summary = "플레이스 검색",
+		description = "키워드로 플레이스 검색",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
+	@GetMapping("/places")
+	public ResponseEntity<Page<PlaceListResponse>> searchPlaces(
+		@RequestParam String keyword,
+		@PageableDefault Pageable pageable) {
+
+		Page<PlaceListResponse> result = placeSearchService.searchPlaces(keyword, pageable);
+
+		return ApiResponseHandler.getObjectSuccess(result);
+	}
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.traveljournal.domain.auth.controller.docs.AuthControllerDocs;
 import com.traveljournal.domain.auth.dto.LoginCombinedResponse;
+import com.traveljournal.domain.auth.dto.LoginResponse;
 import com.traveljournal.domain.auth.service.AuthService;
 import com.traveljournal.domain.auth.util.EnumUtils;
 import com.traveljournal.domain.member.entity.SocialProvider;
@@ -31,7 +32,7 @@ public class AuthController implements AuthControllerDocs {
 
 	@GetMapping("/login/{socialProvider}/callback")
 	@Override
-	public ResponseEntity<?> socialCallback(
+	public ResponseEntity<LoginResponse> socialCallback(
 		@RequestParam String code,
 		@RequestParam(required = false) String deviceId,
 		@PathVariable String socialProvider,
@@ -48,7 +49,7 @@ public class AuthController implements AuthControllerDocs {
 
 	@PostMapping("/login/{socialProvider}/id-token")
 	@Override
-	public ResponseEntity<?> socialLoginWithIdToken(
+	public ResponseEntity<LoginResponse> socialLoginWithIdToken(
 		@RequestHeader("Authorization") String authorizationHeader,
 		@RequestParam(required = false) String deviceId,
 		@PathVariable String socialProvider,

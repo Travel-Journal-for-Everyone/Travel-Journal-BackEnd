@@ -40,7 +40,7 @@ public class PlaceController {
 		@Parameter(description = "수도권, 강원도, 충정도, 경상도, 전라도, 제주도")
 		@PathVariable String regionName,
 		@ParameterObject @PageableDefault Pageable pageable) {
-		return ApiResponseHandler.getObjectSuccess(placeService.findPlacesByRegionWithPagion(memberId, regionName, pageable));
+		return ApiResponseHandler.getObjectSuccess(placeService.findPlacesByRegionWithPaging(memberId, regionName, pageable));
 	}
 
 	@Operation(

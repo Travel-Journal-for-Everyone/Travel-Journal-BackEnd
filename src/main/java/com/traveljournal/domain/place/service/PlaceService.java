@@ -1,6 +1,11 @@
 package com.traveljournal.domain.place.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.traveljournal.domain.place.dto.PlaceListResponse;
 import com.traveljournal.domain.place.entity.Place;
 import com.traveljournal.domain.place.repository.PlaceRepository;
+import com.traveljournal.global.util.RegionGroupUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,25 +24,37 @@ public class PlaceService {
 	private final PlaceRepository placeRepository;
 
 	@Transactional(readOnly = true)
-	public Page<PlaceListResponse> findPlacesByRegionWithPagion(Long memberId, String regionName, Pageable pageable) {
-		Page<Place> places = placeRepository.findByMemberIdAndRegionContaining(memberId, regionName, pageable);
-		return places.map(place -> new PlaceListResponse(
-			place.getId(),
-			place.getTitle(),
-			place.getRegion(),
-			place.getThumbnailUrl()
-		));
+	public Page<PlaceListResponse> findPlacesByRegionWithPaging(Long memberId, String regionName, Pageable pageable) {
+		List<String> regionList = RegionGroupUtil.getRegionList(regionName);
+
+		Page<Long> placeIdPage = placeRepository.findIdsByMemberIdAndRegionIn(memberId, regionList, pageable);
+		return getPlaceListResponses(pageable, placeIdPage);
 	}
 
 	@Transactional(readOnly = true)
 	public Page<PlaceListResponse> findAllPlacesByMemberId(Long memberId, Pageable pageable) {
-		// 회원별 플레이스 조회 로직 필요시 구현
-		Page<Place> places = placeRepository.findByMemberId(memberId, pageable);
-		return places.map(place -> new PlaceListResponse(
-			place.getId(),
-			place.getTitle(),
-			place.getRegion(),
-			place.getThumbnailUrl()
-		));
+		Page<Long> placeIdPage = placeRepository.findIdsByMemberId(memberId, pageable);
+		return getPlaceListResponses(pageable, placeIdPage);
+	}
+
+	private Page<PlaceListResponse> getPlaceListResponses(Pageable pageable, Page<Long> placeIdPage) {
+		List<Long> placeIds = placeIdPage.getContent();
+		List<Place> places = placeRepository.findAllByIdIn(placeIds);
+
+		Map<Long, Place> placeMap = places.stream().collect(Collectors.toMap(Place::getId, p -> p));
+		List<Place> sortedPlaces = placeIds.stream().map(placeMap::get).toList();
+
+		return new PageImpl<>(
+			sortedPlaces.stream()
+				.map(place -> new PlaceListResponse(
+					place.getId(),
+					place.getTitle(),
+					place.getRegion(),
+					place.getThumbnailUrl()
+				))
+				.toList(),
+			pageable,
+			placeIdPage.getTotalElements()
+		);
 	}
 }

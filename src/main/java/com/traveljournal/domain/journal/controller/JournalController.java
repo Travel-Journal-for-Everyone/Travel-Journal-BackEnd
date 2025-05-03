@@ -40,7 +40,7 @@ public class JournalController {
 		@Parameter(description = "수도권, 강원도, 충정도, 경상도, 전라도, 제주도")
 		@PathVariable String regionName,
 		@ParameterObject @PageableDefault Pageable pageable) {
-		return ApiResponseHandler.getObjectSuccess(journalService.findJournalsByRegionWithPaging(regionName, pageable));
+		return ApiResponseHandler.getObjectSuccess(journalService.findJournalsByRegionWithPaging(memberId, regionName, pageable));
 	}
 
 	@Operation(
@@ -53,6 +53,6 @@ public class JournalController {
 		@Parameter(description = "조회할 member_id")
 		@PathVariable Long memberId,
 		@ParameterObject @PageableDefault Pageable pageable) {
-		return ApiResponseHandler.getObjectSuccess(journalService.findAllJournalsByMemberId(pageable));
+		return ApiResponseHandler.getObjectSuccess(journalService.findAllJournalsByMemberId(memberId, pageable));
 	}
 }

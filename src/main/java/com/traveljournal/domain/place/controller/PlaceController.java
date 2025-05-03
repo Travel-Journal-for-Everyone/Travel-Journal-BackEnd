@@ -1,5 +1,6 @@
 package com.traveljournal.domain.place.controller;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -14,6 +15,7 @@ import com.traveljournal.domain.place.service.PlaceService;
 import com.traveljournal.global.data.ApiResponseHandler;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +35,11 @@ public class PlaceController {
 	)
 	@GetMapping("/members/{memberId}/places/region/{regionName}")
 	public ResponseEntity<Page<PlaceListResponse>> findPlacesByRegionPaged(
+		@Parameter(description = "조회할 member_id")
 		@PathVariable Long memberId,
+		@Parameter(description = "수도권, 강원도, 충정도, 경상도, 전라도, 제주도")
 		@PathVariable String regionName,
-		@PageableDefault Pageable pageable) {
+		@ParameterObject @PageableDefault Pageable pageable) {
 		return ApiResponseHandler.getObjectSuccess(placeService.findPlacesByRegionWithPagion(memberId, regionName, pageable));
 	}
 
@@ -46,8 +50,9 @@ public class PlaceController {
 	)
 	@GetMapping("/members/{memberId}/places")
 	public ResponseEntity<Page<PlaceListResponse>> findJournalsByMember(
+		@Parameter(description = "조회할 member_id")
 		@PathVariable Long memberId,
-		@PageableDefault Pageable pageable) {
+		@ParameterObject @PageableDefault Pageable pageable) {
 		return ApiResponseHandler.getObjectSuccess(placeService.findAllPlacesByMemberId(memberId, pageable));
 	}
 }

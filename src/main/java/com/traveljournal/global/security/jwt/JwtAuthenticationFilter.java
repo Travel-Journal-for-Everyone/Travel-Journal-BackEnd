@@ -46,10 +46,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 					if (status == JwtValidateStatus.ACCEPTED) {
 						jwtTokenProvider.setAuthentication(token);
-						log.error("토큰 인증 성공");
 					} else if (status == JwtValidateStatus.EXPIRED) {
 						request.setAttribute("exception", "TOKEN_EXPIRED");
-						log.error("토큰 만료");
 						SecurityContextHolder.clearContext();
 					} else if (status == JwtValidateStatus.INVALID) {
 						request.setAttribute("exception", "TOKEN_INVALID");

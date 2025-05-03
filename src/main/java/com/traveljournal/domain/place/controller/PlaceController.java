@@ -36,7 +36,7 @@ public class PlaceController {
 		@PathVariable Long memberId,
 		@PathVariable String regionName,
 		@PageableDefault Pageable pageable) {
-		return ApiResponseHandler.getObjectSuccess(placeService.findPlacesByRegionWithPagion(regionName, pageable));
+		return ApiResponseHandler.getObjectSuccess(placeService.findPlacesByRegionWithPagion(memberId, regionName, pageable));
 	}
 
 	@Operation(
@@ -48,6 +48,6 @@ public class PlaceController {
 	public ResponseEntity<Page<PlaceListResponse>> findJournalsByMember(
 		@PathVariable Long memberId,
 		@PageableDefault Pageable pageable) {
-		return ApiResponseHandler.getObjectSuccess(placeService.findAllPlacesByMemberId(pageable));
+		return ApiResponseHandler.getObjectSuccess(placeService.findAllPlacesByMemberId(memberId, pageable));
 	}
 }

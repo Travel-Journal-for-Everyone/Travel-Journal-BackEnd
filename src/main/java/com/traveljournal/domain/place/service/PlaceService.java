@@ -1,15 +1,13 @@
 package com.traveljournal.domain.place.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.traveljournal.domain.place.dto.PlaceListResponse;
-import com.traveljournal.global.dummy.DummyDataProvider;
-import com.traveljournal.global.util.PaginationUtils;
+import com.traveljournal.domain.place.entity.Place;
+import com.traveljournal.domain.place.repository.PlaceRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,21 +15,28 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PlaceService {
 
-	private final DummyDataProvider dummyDataProvider;
+	private final PlaceRepository placeRepository;
 
-	private List<PlaceListResponse> findPlacesByRegion(String regionName) {
-		return dummyDataProvider.getDummyPlacesByRegion(regionName);
+	@Transactional(readOnly = true)
+	public Page<PlaceListResponse> findPlacesByRegionWithPagion(Long memberId, String regionName, Pageable pageable) {
+		Page<Place> places = placeRepository.findByMemberIdAndRegionContaining(memberId, regionName, pageable);
+		return places.map(place -> new PlaceListResponse(
+			place.getId(),
+			place.getTitle(),
+			place.getRegion(),
+			place.getThumbnailUrl()
+		));
 	}
 
 	@Transactional(readOnly = true)
-	public Page<PlaceListResponse> findPlacesByRegionWithPagion(String regionName, Pageable pageable) {
-		List<PlaceListResponse> allData = findPlacesByRegion(regionName);
-		return PaginationUtils.getPagedList(allData, pageable);
-	}
-
-	@Transactional(readOnly = true)
-	public Page<PlaceListResponse> findAllPlacesByMemberId(Pageable pageable) {
-		List<PlaceListResponse> allData = findPlacesByRegion("all");
-		return PaginationUtils.getPagedList(allData, pageable);
+	public Page<PlaceListResponse> findAllPlacesByMemberId(Long memberId, Pageable pageable) {
+		// 회원별 플레이스 조회 로직 필요시 구현
+		Page<Place> places = placeRepository.findByMemberId(memberId, pageable);
+		return places.map(place -> new PlaceListResponse(
+			place.getId(),
+			place.getTitle(),
+			place.getRegion(),
+			place.getThumbnailUrl()
+		));
 	}
 }

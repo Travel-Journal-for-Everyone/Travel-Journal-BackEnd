@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Valid
 @RequestMapping("/v1/search")
-@Tag(name = "Search API", description = "사용자 검색")
+@Tag(name = "Search API", description = "검색 API")
 public class SearchController {
 
 	private final MemberSearchService memberSearchService;

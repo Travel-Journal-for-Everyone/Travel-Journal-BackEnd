@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.traveljournal.domain.journal.entity.Journal;
 import com.traveljournal.domain.place.entity.Place;
 
 import jakarta.persistence.Column;
@@ -61,6 +62,9 @@ public class Member {
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
 	private List<Place> places = new ArrayList<>();
+
+	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+	private List<Journal> journals = new ArrayList<>();
 
 	@PrePersist
 	public void prePersist() {

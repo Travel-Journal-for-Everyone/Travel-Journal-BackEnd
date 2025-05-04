@@ -1,7 +1,7 @@
 spring:
   datasource:
-    url: jdbc:mysql://mysql:3306/traveljournal_db
-    username: app_user
+    url: jdbc:mysql://${secret.prod-db-endpoint}:3306/traveljournal_db
+    username: root
     password: ${secret.prod-password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 

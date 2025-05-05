@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://${secret.prod-db-endpoint}:3306/traveljournal_db
+    url: jdbc:mysql://${secret.prod-db-endpoint}:3306/traveljournal_db?serverTimezone=Asia/Seoul
     username: root
     password: ${secret.prod-password}
     driver-class-name: com.mysql.cj.jdbc.Driver

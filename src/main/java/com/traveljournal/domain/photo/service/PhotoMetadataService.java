@@ -51,8 +51,12 @@ public class PhotoMetadataService {
 				if (dateString != null) {
 					DateTimeFormatter exifFormatter = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
 					LocalDateTime localDateTime = LocalDateTime.parse(dateString, exifFormatter);
-					return localDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+					DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+					return localDateTime.format(outputFormatter);
 				}
+
+
 			} catch (Exception e) {
 				log.debug("촬영일시 추출 실패(메타데이터 없음 또는 파싱 실패): {}", e.getMessage());
 			}

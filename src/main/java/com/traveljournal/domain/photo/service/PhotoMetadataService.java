@@ -1,6 +1,7 @@
 package com.traveljournal.domain.photo.service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.springframework.stereotype.Service;
@@ -44,19 +45,21 @@ public class PhotoMetadataService {
 
 	private String extractDateTime(Metadata metadata) {
 		ExifSubIFDDirectory directory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-		if (directory != null && directory.hasTagName(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL)) {
+		if (directory != null && directory.containsTag(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL)) {
 			try {
-				return directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL)
-					.toInstant()
-					.atZone(java.time.ZoneId.systemDefault())
-					.toLocalDateTime()
-					.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+				String dateString = directory.getString(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+				if (dateString != null) {
+					DateTimeFormatter exifFormatter = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
+					LocalDateTime localDateTime = LocalDateTime.parse(dateString, exifFormatter);
+					return localDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+				}
 			} catch (Exception e) {
 				log.debug("촬영일시 추출 실패(메타데이터 없음 또는 파싱 실패): {}", e.getMessage());
 			}
 		}
 		return null;
 	}
+
 
 	private String extractAddress(Double latitude, Double longitude) {
 		if (latitude != null && longitude != null) {

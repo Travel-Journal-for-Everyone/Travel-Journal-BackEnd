@@ -89,6 +89,7 @@ dependencies {
 
     // 이미지 리사이징을 위한 Thumbnailator
     implementation 'net.coobird:thumbnailator:0.4.20'
+    implementation 'com.drewnoakes:metadata-extractor:2.18.0'
 }
 
 // 현대적인 태스크 구성 방식

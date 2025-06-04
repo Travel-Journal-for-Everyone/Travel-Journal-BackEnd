@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record PhotoMetadataResponse(
-	@Schema(example = "2025-06-04T21:27:32")
+	@Schema(example = "2025.06.04 21:27")
 	String takenDateTime,    // 촬영일시
 	@Schema(example = "서울 강서구 마곡동 735")
 	String address,          // 주소

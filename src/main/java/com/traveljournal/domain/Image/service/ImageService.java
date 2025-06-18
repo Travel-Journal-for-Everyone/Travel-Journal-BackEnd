@@ -69,7 +69,7 @@ public class ImageService {
 	/**
 	 * 이미지 정보를 데이터베이스에 저장
 	 */
-	private ImageInfo saveImageInfo(String filename, String uploadFilename) {
+	public ImageInfo saveImageInfo(String filename, String uploadFilename) {
 		ImageInfo imageInfo = ImageInfo.builder()
 			.filename(filename)
 			.uploadFilename(uploadFilename)
@@ -81,7 +81,7 @@ public class ImageService {
 	/**
 	 * 이미지 파일 유효성 검사
 	 */
-	private void validateImageFile(MultipartFile file) {
+	public void validateImageFile(MultipartFile file) {
 		if (file.isEmpty()) {
 			throw new IllegalArgumentException("빈 파일은 업로드할 수 없습니다.");
 		}
@@ -92,25 +92,6 @@ public class ImageService {
 		}
 	}
 
-	// /**
-	//  * 이미지 리사이징
-	//  */
-	// private byte[] resizeImage(MultipartFile imageFile) throws IOException {
-	// 	try (InputStream inputStream = imageFile.getInputStream();
-	// 		 ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-	//
-	// 		// Thumbnailator 라이브러리를 사용하여 이미지 리사이징
-	// 		Thumbnails.of(inputStream)
-	// 			.size(ImageService.PROFILE_ORIGINAL_SIZE, ImageService.PROFILE_ORIGINAL_SIZE)
-	// 			.keepAspectRatio(true)
-	// 			.outputQuality(0.85) // 이미지 품질 설정 (85%)
-	// 			.outputFormat(FilenameUtil.getExtension(imageFile.getOriginalFilename()))
-	// 			.toOutputStream(outputStream);
-	//
-	// 		return outputStream.toByteArray();
-	// 	}
-	// }
-
 	/**
 	 * S3에 이미지 업로드 (SDK V2 방식)
 	 * @param imageBytes 업로드할 이미지 바이트 배열
@@ -119,7 +100,7 @@ public class ImageService {
 	 * @param isResized 리사이즈된 이미지인지 여부
 	 * @return 업로드된 이미지의 URL
 	 */
-	private String uploadToS3(byte[] imageBytes, String fileName, String extension, boolean isResized) {
+	public String uploadToS3(byte[] imageBytes, String fileName, String extension, boolean isResized) {
 		// 리사이즈된 이미지는 resizedPath에, 원본 이미지는 uploadPath에 저장
 		String path = isResized ? resizedPath : uploadPath;
 		String key = path + "/" + fileName;
@@ -145,5 +126,10 @@ public class ImageService {
 
 	public String getDefaultProfileImageUrl() {
 		return String.format("https://%s.s3.amazonaws.com/%s", bucketName, defaultProfileImage);
+	}
+
+	public String getImageUrl(String filename) {
+		String key = uploadPath + "/" + filename;
+		return String.format("https://%s.s3.amazonaws.com/%s", bucketName, key);
 	}
 }

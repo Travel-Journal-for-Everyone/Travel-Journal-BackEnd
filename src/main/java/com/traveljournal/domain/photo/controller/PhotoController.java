@@ -1,5 +1,7 @@
 package com.traveljournal.domain.photo.controller;
 
+import java.util.List;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,8 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.traveljournal.domain.photo.dto.PhotoMetadataResponse;
+import com.traveljournal.domain.photo.dto.PhotoUploadResponse;
 import com.traveljournal.domain.photo.service.PhotoMetadataService;
+import com.traveljournal.domain.photo.service.PhotoService;
 import com.traveljournal.global.data.ApiResponseHandler;
+import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class PhotoController {
 
 	private final PhotoMetadataService photoMetadataService;
+	private final PhotoService photoService;
 
 	@PostMapping(value = "/metadata",
 		consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -41,5 +47,18 @@ public class PhotoController {
 		@RequestPart("image") MultipartFile imageFile) {
 
 		return ApiResponseHandler.getObjectSuccess(photoMetadataService.extractMetadata(imageFile));
+	}
+
+	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Operation(
+		summary = "여러 장의 사진 파일 업로드",
+		description = "여러 장의 사진 파일을 저장합니다.",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
+	public ResponseEntity<List<PhotoUploadResponse>> uploadPhoto(
+		@RequestPart("images") List<MultipartFile> photoFile) {
+
+		Long memberId = SecurityUtil.getCurrentMemberId();
+		return ApiResponseHandler.getObjectSuccess(photoService.uploadJournalPhotos(photoFile, memberId));
 	}
 }

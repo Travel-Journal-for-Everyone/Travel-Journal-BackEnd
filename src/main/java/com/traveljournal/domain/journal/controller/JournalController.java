@@ -20,6 +20,10 @@ import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -68,6 +72,11 @@ public class JournalController {
 		description = "여행일지, 일차, 방문지, 사진 메타데이터를 한 번에 저장합니다.",
 		security = @SecurityRequirement(name = "bearer-key")
 	)
+	@ApiResponses(@ApiResponse(
+		responseCode = "200",
+		description = "성공",
+		content = @Content(mediaType = "text/plain", examples = @ExampleObject(name = "여행일지 작성 성공", value = "여행일지 작성 성공 journal_id: 1"))
+	))
 	public ResponseEntity<?> createJournal(
 		@RequestBody @Valid JournalCreateRequest journalCreateRequest
 	) {

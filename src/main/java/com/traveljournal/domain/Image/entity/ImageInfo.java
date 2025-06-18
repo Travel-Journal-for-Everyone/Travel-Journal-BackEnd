@@ -1,5 +1,7 @@
 package com.traveljournal.domain.Image.entity;
 
+import org.checkerframework.common.aliasing.qual.Unique;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +22,7 @@ public class ImageInfo {
 	private Long id;
 
 	@Column(nullable = false)
+	@Unique
 	private String filename;
 
 	@Column(nullable = false)

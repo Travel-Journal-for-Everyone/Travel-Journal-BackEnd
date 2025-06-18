@@ -2,8 +2,13 @@ package com.traveljournal.domain.journal.dto;
 
 import java.util.List;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.traveljournal.domain.hashtag.entity.HashTag;
+import com.traveljournal.domain.journal.entity.Journal;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
+
+@Builder
 public record JournalListResponse(
 	@Schema(example = "1")
 	Long journalId,
@@ -20,4 +25,15 @@ public record JournalListResponse(
 	@Schema(example = "2025.03.18")
 	String endDate
 ) {
+	public static JournalListResponse of(Journal journal) {
+		return JournalListResponse.builder()
+			.journalId(journal.getId())
+			.hashTag(journal.getHashTags().stream().map(HashTag::getTagName).toList())
+			.title(journal.getTitle())
+			.nights(journal.getNights())
+			.days(journal.getDays())
+			.startDate(journal.getStartDate())
+			.endDate(journal.getEndDate())
+			.build();
+	}
 }

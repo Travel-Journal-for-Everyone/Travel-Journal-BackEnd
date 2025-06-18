@@ -96,4 +96,10 @@ public class Member {
 		}
 
 	}
+
+	public static Member withId(Long id) {
+		Member m = new Member();
+		m.id = id;
+		return m;
+	}
 }

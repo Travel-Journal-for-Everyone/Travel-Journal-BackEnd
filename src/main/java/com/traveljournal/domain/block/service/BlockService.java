@@ -1,16 +1,21 @@
 package com.traveljournal.domain.block.service;
 
-import com.traveljournal.domain.block.dto.BlockResponse;
-import com.traveljournal.domain.block.entity.Block;
-import com.traveljournal.domain.member.entity.Member;
-import com.traveljournal.domain.block.repository.BlockRepository;
-import com.traveljournal.domain.member.service.MemberService;
-import com.traveljournal.global.exception.BlockBadRequestException;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.traveljournal.domain.block.dto.BlockRelationType;
+import com.traveljournal.domain.block.dto.BlockResponse;
+import com.traveljournal.domain.block.entity.Block;
+import com.traveljournal.domain.block.repository.BlockRepository;
+import com.traveljournal.domain.member.entity.Member;
+import com.traveljournal.domain.member.service.MemberService;
+import com.traveljournal.global.exception.BlockBadRequestException;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -57,5 +62,26 @@ public class BlockService {
     public boolean isBlocked(Member viewer, Member target) {
         return blockRepository.existsByBlockerAndBlocked(viewer, target) ||
                 blockRepository.existsByBlockerAndBlocked(target, viewer);
+    }
+
+    @Transactional(readOnly = true)
+    public BlockRelationType getBlockRelation(Member viewer, Member target) {
+        boolean blockedByMe = blockRepository.existsByBlockerAndBlocked(viewer, target);
+        boolean blockedMe = blockRepository.existsByBlockerAndBlocked(target, viewer);
+
+        if (blockedByMe && blockedMe) {
+            return BlockRelationType.MUTUAL_BLOCK;
+        } else if (blockedByMe) {
+            return BlockRelationType.BLOCKED_BY_ME;
+        } else if (blockedMe) {
+            return BlockRelationType.BLOCKED_ME;
+        } else {
+            return BlockRelationType.NONE;
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getBlockedMemberIds(Long viewerId) {
+        return blockRepository.findBlockedMemberIdsByBlockerId(viewerId);
     }
 }

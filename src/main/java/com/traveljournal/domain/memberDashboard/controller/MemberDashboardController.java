@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.traveljournal.domain.memberDashboard.dto.MemberDashbordResponse;
 import com.traveljournal.domain.memberDashboard.service.MemberDashboardService;
 import com.traveljournal.global.data.ApiResponseHandler;
+import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,8 +31,9 @@ public class MemberDashboardController {
 	)
 	public ResponseEntity<MemberDashbordResponse> getMemberDashborad(
 		@PathVariable("memberId") Long memberId) {
+		Long currentMemberId = SecurityUtil.getCurrentMemberId();
 
-		MemberDashbordResponse memberDashbordResponse = memberDashboardService.getMemberDashbord(memberId);
+		MemberDashbordResponse memberDashbordResponse = memberDashboardService.getMemberDashbord(memberId, currentMemberId);
 
 		return ApiResponseHandler.getObjectSuccess(memberDashbordResponse);
 	}

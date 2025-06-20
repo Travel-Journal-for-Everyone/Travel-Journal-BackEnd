@@ -4,9 +4,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.traveljournal.domain.block.service.BlockService;
+import com.traveljournal.domain.member.dto.MemberProfileResponse;
 import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.memberDashboard.dto.MemberDashbordResponse;
-import com.traveljournal.domain.member.dto.MemberProfileResponse;
 import com.traveljournal.domain.memberDashboard.dto.RegionInfo;
 
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberDashboardService {
 
 	private final MemberService memberService;
+	private final BlockService blockService;
 
-	public MemberDashbordResponse getMemberDashbord(Long memberId) {
+	public MemberDashbordResponse getMemberDashbord(Long memberId, Long viewerId) {
+
+		blockService.validateNotBlocked(viewerId, memberId);
 
 		MemberProfileResponse memberProfileResponse = memberService.getMemberProfile(memberId);
 

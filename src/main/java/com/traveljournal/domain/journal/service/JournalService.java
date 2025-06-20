@@ -54,6 +54,8 @@ public class JournalService {
 	@Transactional(readOnly = true)
 	public Page<JournalListResponse> findJournalsByRegionWithPaging(Long memberId, Long viewerId, String regionName,
 		Pageable pageable) {
+		blockService.validateNotBlocked(viewerId, memberId);
+
 		List<String> regionList = RegionGroupUtil.getRegionList(regionName);
 		List<Long> blockedIds = blockService.getBlockedMemberIds(viewerId);
 
@@ -63,6 +65,7 @@ public class JournalService {
 
 	@Transactional(readOnly = true)
 	public Page<JournalListResponse> findAllJournalsByMemberId(Long memberId, Long viewerId, Pageable pageable) {
+		blockService.validateNotBlocked(viewerId, memberId);
 
 		List<Long> blockedIds = blockService.getBlockedMemberIds(viewerId);
 		Page<Long> journalIdPage = journalRepository.findIdsByMemberIdExcludingBlocked(memberId, blockedIds, pageable);

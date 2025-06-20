@@ -52,4 +52,9 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleBlockBadRequest(BlockBadRequestException ex) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
 	}
+
+	@ExceptionHandler(ForbiddenException.class)
+	public ResponseEntity<String> handleForbiddenException(ForbiddenException ex) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+	}
 }

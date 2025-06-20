@@ -14,6 +14,7 @@ import com.traveljournal.domain.block.repository.BlockRepository;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.global.exception.BlockBadRequestException;
+import com.traveljournal.global.exception.ForbiddenException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -64,10 +65,9 @@ public class BlockService {
                 blockRepository.existsByBlockerAndBlocked(target, viewer);
     }
 
-    @Transactional(readOnly = true)
-    public BlockRelationType getBlockRelation(Member viewer, Member target) {
-        boolean blockedByMe = blockRepository.existsByBlockerAndBlocked(viewer, target);
-        boolean blockedMe = blockRepository.existsByBlockerAndBlocked(target, viewer);
+    private BlockRelationType getBlockRelation(Long viewerId, Long memberId) {
+        boolean blockedByMe = blockRepository.existsByBlockerIdAndBlockedId(viewerId, memberId);
+        boolean blockedMe = blockRepository.existsByBlockerIdAndBlockedId(memberId, viewerId);
 
         if (blockedByMe && blockedMe) {
             return BlockRelationType.MUTUAL_BLOCK;
@@ -83,5 +83,13 @@ public class BlockService {
     @Transactional(readOnly = true)
     public List<Long> getBlockedMemberIds(Long viewerId) {
         return blockRepository.findBlockedMemberIdsByBlockerId(viewerId);
+    }
+
+    @Transactional
+    public void validateNotBlocked(Long viewerId, Long memberId) {
+        BlockRelationType relation = getBlockRelation(viewerId, memberId);
+        if (relation != BlockRelationType.NONE) {
+            throw new ForbiddenException("차단된 회원입니다.");
+        }
     }
 }

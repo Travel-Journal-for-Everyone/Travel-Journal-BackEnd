@@ -80,4 +80,19 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
     """, nativeQuery = true)
 	List<Long> findOptimizedRandomAll(@Param("limit") int limit);
 
+	@Query("""
+    SELECT j.id FROM Journal j
+    WHERE j.member.id = :memberId
+      AND j.region IN :regions
+      AND (:blockedIds IS NULL OR j.member.id NOT IN :blockedIds)
+    """)
+	Page<Long> findIdsByMemberIdAndRegionInExcludingBlocked(@Param("memberId") Long memberId, @Param("regions") List<String> regions, @Param("blockedIds") List<Long> blockedIds, Pageable pageable);
+
+	@Query("""
+    SELECT j.id FROM Journal j
+    WHERE j.member.id = :memberId
+      AND (:blockedIds IS NULL OR j.member.id NOT IN :blockedIds)
+    """)
+	Page<Long> findIdsByMemberIdExcludingBlocked(@Param("memberId") Long memberId, @Param("blockedIds") List<Long> blockedIds, Pageable pageable);
+
 }

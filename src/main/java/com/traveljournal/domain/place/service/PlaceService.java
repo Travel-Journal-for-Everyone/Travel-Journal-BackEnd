@@ -10,8 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.traveljournal.domain.block.repository.BlockRepository;
 import com.traveljournal.domain.block.service.BlockService;
-import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.place.dto.PlaceListResponse;
 import com.traveljournal.domain.place.entity.Place;
 import com.traveljournal.domain.place.repository.PlaceRepository;
@@ -24,13 +24,16 @@ import lombok.RequiredArgsConstructor;
 public class PlaceService {
 
 	private final PlaceRepository placeRepository;
-	private final MemberService memberService;
+	private final BlockRepository blockRepository;
 	private final BlockService blockService;
 
 	@Transactional(readOnly = true)
 	public Page<PlaceListResponse> findPlacesByRegionWithPaging(Long memberId, Long viewerId, String regionName, Pageable pageable) {
 
+		blockService.validateNotBlocked(viewerId, memberId);
+
 		List<String> regionList = RegionGroupUtil.getRegionList(regionName);
+
 		List<Long> blockedIds = blockService.getBlockedMemberIds(viewerId);
 
 		Page<Long> placeIdPage = placeRepository.findIdsByMemberIdAndRegionInExcludingBlocked(memberId, regionList, blockedIds, pageable);
@@ -39,6 +42,8 @@ public class PlaceService {
 
 	@Transactional(readOnly = true)
 	public Page<PlaceListResponse> findAllPlacesByMemberId(Long memberId, Long viewerId, Pageable pageable) {
+
+		blockService.validateNotBlocked(viewerId, memberId);
 
 		List<Long> blockedIds = blockService.getBlockedMemberIds(viewerId);
 		Page<Long> placeIdPage = placeRepository.findIdsByMemberIdExcludingBlocked(memberId, blockedIds, pageable);

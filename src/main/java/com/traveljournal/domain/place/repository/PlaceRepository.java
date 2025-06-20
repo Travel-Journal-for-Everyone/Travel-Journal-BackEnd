@@ -32,4 +32,20 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
 		FROM Place p
 		WHERE (p.title LIKE %:keyword% OR p.region LIKE %:keyword%) AND p.member.id NOT IN :blockedMemberIds""")
 	Page<Long> findIdsByKeywordExcludingBlockedMembers(@Param("keyword") String keyword,@Param("blockedMemberIds") List<Long> blockedMemberIds, Pageable pageable);
+
+	@Query("""
+    SELECT j.id FROM Journal j
+    WHERE j.member.id = :memberId
+      AND j.region IN :regions
+      AND (:blockedIds IS NULL OR j.member.id NOT IN :blockedIds)
+    """)
+	Page<Long> findIdsByMemberIdAndRegionInExcludingBlocked(@Param("memberId") Long memberId, @Param("regions") List<String> regions, @Param("blockedIds") List<Long> blockedIds, Pageable pageable);
+
+	@Query("""
+    SELECT j.id FROM Journal j
+    WHERE j.member.id = :memberId
+      AND (:blockedIds IS NULL OR j.member.id NOT IN :blockedIds)
+    """)
+	Page<Long> findIdsByMemberIdExcludingBlocked(@Param("memberId") Long memberId, @Param("blockedIds") List<Long> blockedIds, Pageable pageable);
+
 }

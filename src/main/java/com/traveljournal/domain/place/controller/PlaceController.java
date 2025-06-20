@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.traveljournal.domain.place.dto.PlaceListResponse;
 import com.traveljournal.domain.place.service.PlaceService;
 import com.traveljournal.global.data.ApiResponseHandler;
+import com.traveljournal.global.security.util.SecurityUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,7 +41,8 @@ public class PlaceController {
 		@Parameter(description = "수도권, 강원도, 충정도, 경상도, 전라도, 제주도")
 		@PathVariable String regionName,
 		@ParameterObject @PageableDefault Pageable pageable) {
-		return ApiResponseHandler.getObjectSuccess(placeService.findPlacesByRegionWithPaging(memberId, regionName, pageable));
+		Long currentMemberId = SecurityUtil.getCurrentMemberId();
+		return ApiResponseHandler.getObjectSuccess(placeService.findPlacesByRegionWithPaging(memberId, currentMemberId, regionName, pageable));
 	}
 
 	@Operation(
@@ -53,6 +55,7 @@ public class PlaceController {
 		@Parameter(description = "조회할 member_id")
 		@PathVariable Long memberId,
 		@ParameterObject @PageableDefault Pageable pageable) {
-		return ApiResponseHandler.getObjectSuccess(placeService.findAllPlacesByMemberId(memberId, pageable));
+		Long currentMemberId = SecurityUtil.getCurrentMemberId();
+		return ApiResponseHandler.getObjectSuccess(placeService.findAllPlacesByMemberId(memberId, currentMemberId, pageable));
 	}
 }

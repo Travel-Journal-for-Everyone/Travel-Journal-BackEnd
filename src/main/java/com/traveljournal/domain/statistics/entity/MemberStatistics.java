@@ -39,4 +39,17 @@ public class MemberStatistics {
 	public void decreaseTravelDiaryCount() {
 		this.travelDiaryCount = Math.max(0, this.travelDiaryCount - 1);
 	}
+
+	public void increaseFollowerCount() {
+		this.followerCount++;
+	}
+	public void decreaseFollowerCount() {
+		this.followerCount = Math.max(0, this.followerCount - 1);
+	}
+	public void increaseFollowingCount() {
+		this.followingCount++;
+	}
+	public void decreaseFollowingCount() {
+		this.followingCount = Math.max(0, this.followingCount - 1);
+	}
 }

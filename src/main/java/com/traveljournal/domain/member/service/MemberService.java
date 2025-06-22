@@ -17,6 +17,8 @@ import com.traveljournal.domain.member.entity.SocialProvider;
 import com.traveljournal.domain.member.repository.MemberRepository;
 import com.traveljournal.domain.member.repository.SocialTokenRepository;
 import com.traveljournal.domain.member.repository.TokenRepository;
+import com.traveljournal.domain.statistics.entity.MemberStatistics;
+import com.traveljournal.domain.statistics.repository.MemberStatisticsRepository;
 import com.traveljournal.global.exception.MemberDeleteException;
 import com.traveljournal.global.exception.ResourceNotFoundException;
 
@@ -36,6 +38,7 @@ public class MemberService {
 	private final ImageService imageService;
 	private final TokenRepository tokenRepository;
 	private final SocialTokenRepository socialTokenRepository;
+	private final MemberStatisticsRepository memberStatisticsRepository;
 
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -72,7 +75,18 @@ public class MemberService {
 
 		Member newMember = createNewMember(socialMemberInfo, socialProvider);
 
-		return memberRepository.save(newMember);
+		Member savedMember = memberRepository.save(newMember);
+
+		MemberStatistics stats = new MemberStatistics(
+			savedMember.getId(),
+			0L,
+			0L,
+			0L,
+			0L
+		);
+		memberStatisticsRepository.save(stats);
+
+		return savedMember;
 	}
 
 	public Member createNewMember(SocialMemberInfo socialMemberInfo, SocialProvider socialProvider) {
@@ -157,8 +171,10 @@ public class MemberService {
 	public MemberProfileResponse getMemberProfile(Long memberId) {
 
 		Member member = findById(memberId);
+		MemberStatistics stats = memberStatisticsRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("통계 정보 없음"));
 
-		return MemberProfileResponse.of(member);
+		return MemberProfileResponse.of(member, stats);
 	}
 
 	@Transactional

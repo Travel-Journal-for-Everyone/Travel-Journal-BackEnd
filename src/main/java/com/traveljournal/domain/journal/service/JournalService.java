@@ -20,7 +20,7 @@ import com.traveljournal.domain.Image.repository.ImageInfoRepository;
 import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.block.service.BlockService;
 import com.traveljournal.domain.hashtag.entity.HashTag;
-import com.traveljournal.domain.hashtag.repository.HashTagRepository;
+import com.traveljournal.domain.hashtag.service.HashTagService;
 import com.traveljournal.domain.journal.dto.JournalCreateRequest;
 import com.traveljournal.domain.journal.dto.JournalDayRequest;
 import com.traveljournal.domain.journal.dto.JournalDaySpotRequest;
@@ -46,7 +46,7 @@ import lombok.RequiredArgsConstructor;
 public class JournalService {
 
 	private final JournalRepository journalRepository;
-	private final HashTagRepository hashTagRepository;
+	private final HashTagService hashTagService;
 	private final ImageInfoRepository imageInfoRepository;
 	private final MemberRegionStatisticsService memberRegionStatisticsService;
 	private final ImageService imageService;
@@ -105,7 +105,7 @@ public class JournalService {
 		validateRequest(request);
 
 		Member member = memberService.findById(memberId);
-		List<HashTag> tags = getOrCreateHashTags(request.hashTag());
+		List<HashTag> tags = hashTagService.getOrCreateHashTags(request.hashTag());
 
 		Journal journal = createJournalEntity(request, member, tags);
 
@@ -135,16 +135,6 @@ public class JournalService {
 		if (request.photoMetadataList() == null) {
 			throw new BadRequestException("사진 메타데이터가 필요합니다.");
 		}
-	}
-
-	private List<HashTag> getOrCreateHashTags(List<String> tagNames) {
-		List<HashTag> tags = new ArrayList<>();
-		for (String tagName : tagNames) {
-			HashTag tag = hashTagRepository.findByTagName(tagName)
-				.orElseGet(() -> hashTagRepository.save(HashTag.of(tagName)));
-			tags.add(tag);
-		}
-		return tags;
 	}
 
 	private Journal createJournalEntity(JournalCreateRequest request, Member member, List<HashTag> tags) {

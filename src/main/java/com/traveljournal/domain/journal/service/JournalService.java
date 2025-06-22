@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.traveljournal.domain.Image.entity.ImageInfo;
-import com.traveljournal.domain.Image.repository.ImageInfoRepository;
+import com.traveljournal.domain.Image.service.ImageInfoService;
 import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.block.service.BlockService;
 import com.traveljournal.domain.hashtag.entity.HashTag;
@@ -47,7 +47,7 @@ public class JournalService {
 
 	private final JournalRepository journalRepository;
 	private final HashTagService hashTagService;
-	private final ImageInfoRepository imageInfoRepository;
+	private final ImageInfoService imageInfoService;
 	private final MemberRegionStatisticsService memberRegionStatisticsService;
 	private final ImageService imageService;
 	private final PhotoRepository photoRepository;
@@ -185,8 +185,7 @@ public class JournalService {
 				if (!uniqueUploadIds.add(meta.uploadId()))
 					continue;
 
-				ImageInfo imageInfo = imageInfoRepository.findByFilename(meta.uploadId())
-					.orElseThrow(() -> new BadRequestException("이미지 정보가 없습니다: " + meta.uploadId()));
+				ImageInfo imageInfo = imageInfoService.getImageInfo(meta.uploadId());
 
 				if (photoRepository.existsByImageInfo(imageInfo)) {
 					throw new BadRequestException("이미 등록된 사진입니다: " + meta.uploadId());

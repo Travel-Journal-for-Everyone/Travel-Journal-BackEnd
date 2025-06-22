@@ -95,4 +95,6 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
     """)
 	Page<Long> findIdsByMemberIdExcludingBlocked(@Param("memberId") Long memberId, @Param("blockedIds") List<Long> blockedIds, Pageable pageable);
 
+	@Query("SELECT j.region, COUNT(j) FROM Journal j WHERE j.member.id = :memberId GROUP BY j.region")
+	List<Object[]> countJournalsByRegion(@Param("memberId") Long memberId);
 }

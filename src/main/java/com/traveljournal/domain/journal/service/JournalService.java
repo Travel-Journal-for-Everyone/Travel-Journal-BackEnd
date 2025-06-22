@@ -34,6 +34,7 @@ import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.photo.dto.PhotoMetadataRequest;
 import com.traveljournal.domain.photo.entity.Photo;
 import com.traveljournal.domain.photo.repository.PhotoRepository;
+import com.traveljournal.domain.photo.service.PhotoService;
 import com.traveljournal.domain.statistics.service.MemberRegionStatisticsService;
 import com.traveljournal.domain.statistics.service.MemberStatisticsService;
 import com.traveljournal.global.exception.BadRequestException;
@@ -54,6 +55,7 @@ public class JournalService {
 	private final MemberService memberService;
 	private final BlockService blockService;
 	private final MemberStatisticsService memberStatisticsService;
+	private final PhotoService photoService;
 
 	@Transactional(readOnly = true)
 	public Page<JournalListResponse> findJournalsByRegionWithPaging(Long memberId, Long viewerId, String regionName,
@@ -187,9 +189,7 @@ public class JournalService {
 
 				ImageInfo imageInfo = imageInfoService.getImageInfo(meta.uploadId());
 
-				if (photoRepository.existsByImageInfo(imageInfo)) {
-					throw new BadRequestException("이미 등록된 사진입니다: " + meta.uploadId());
-				}
+				photoService.existsByImageInfo(imageInfo, meta.uploadId());
 
 				Photo photo = Photo.builder()
 					.description(meta.description())

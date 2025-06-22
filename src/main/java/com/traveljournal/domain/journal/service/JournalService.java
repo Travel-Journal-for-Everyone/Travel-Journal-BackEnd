@@ -31,6 +31,8 @@ import com.traveljournal.domain.journal.entity.JournalDaySpot;
 import com.traveljournal.domain.journal.repository.JournalRepository;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.service.MemberService;
+import com.traveljournal.domain.statistics.entity.MemberStatistics;
+import com.traveljournal.domain.statistics.repository.MemberStatisticsRepository;
 import com.traveljournal.domain.photo.dto.PhotoMetadataRequest;
 import com.traveljournal.domain.photo.entity.Photo;
 import com.traveljournal.domain.photo.repository.PhotoRepository;
@@ -46,6 +48,7 @@ public class JournalService {
 	private final JournalRepository journalRepository;
 	private final HashTagRepository hashTagRepository;
 	private final ImageInfoRepository imageInfoRepository;
+	private final MemberStatisticsRepository memberStatisticsRepository;
 	private final ImageService imageService;
 	private final PhotoRepository photoRepository;
 	private final MemberService memberService;
@@ -112,6 +115,11 @@ public class JournalService {
 		setThumbnailUrl(journal, journalDays);
 
 		journalRepository.save(journal);
+
+		MemberStatistics stats = memberStatisticsRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("통계 정보 없음"));
+		stats.increaseTravelDiaryCount();
+
 		return journal.getId();
 	}
 

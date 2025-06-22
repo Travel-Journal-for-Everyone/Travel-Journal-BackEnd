@@ -8,9 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.traveljournal.domain.Image.entity.ImageInfo;
 import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.Image.util.FilenameUtil;
 import com.traveljournal.domain.photo.dto.PhotoUploadResponse;
+import com.traveljournal.domain.photo.repository.PhotoRepository;
+import com.traveljournal.global.exception.BadRequestException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PhotoService {
 	private final ImageService imageService;
+	private final PhotoRepository photoRepository;
 
 	@Transactional
 	public PhotoUploadResponse uploadJournalPhoto(MultipartFile photoFile, Long memberId) {
@@ -49,4 +53,11 @@ public class PhotoService {
 		}
 		return photoUploadResponses;
 	}
+
+	public void existsByImageInfo(ImageInfo imageInfo, String filename) {
+		if (photoRepository.existsByImageInfo(imageInfo)) {
+			throw new BadRequestException("이미 등록된 사진입니다: " + filename);
+		}
+	}
+
 }

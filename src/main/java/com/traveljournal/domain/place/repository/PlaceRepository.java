@@ -48,4 +48,6 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
     """)
 	Page<Long> findIdsByMemberIdExcludingBlocked(@Param("memberId") Long memberId, @Param("blockedIds") List<Long> blockedIds, Pageable pageable);
 
+	@Query("SELECT p.region, COUNT(p) FROM Place p WHERE p.member.id = :memberId GROUP BY p.region")
+	List<Object[]> countPlacesByRegion(@Param("memberId") Long memberId);
 }

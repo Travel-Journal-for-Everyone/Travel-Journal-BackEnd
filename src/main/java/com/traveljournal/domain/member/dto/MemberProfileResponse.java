@@ -2,6 +2,7 @@ package com.traveljournal.domain.member.dto;
 
 import com.traveljournal.domain.member.entity.AccountScope;
 import com.traveljournal.domain.member.entity.Member;
+import com.traveljournal.domain.statistics.entity.MemberStatistics;
 
 import lombok.Builder;
 
@@ -17,16 +18,16 @@ public record MemberProfileResponse (
 	Boolean isFirstLogin
 ) {
 
-	public static MemberProfileResponse of(Member member) {
+	public static MemberProfileResponse of(Member member, MemberStatistics memberStatistics) {
 		return MemberProfileResponse.builder()
 			.nickname(member.getNickname())
 			.profileImageUrl(member.getProfileImageUrl())
 			.accountScope(member.getAccountScope())
-			.followerCount(363L)
-			.followingCount(180L)
-			.travelDiaryCount(36L)
-			.placesCount(88L)
+			.followerCount(memberStatistics.getFollowerCount())
+			.followingCount(memberStatistics.getFollowingCount())
+			.travelDiaryCount(memberStatistics.getTravelDiaryCount())
+			.placesCount(memberStatistics.getPlacesCount())
 			.isFirstLogin(member.getIsFirstLogin())
 			.build();
-	}// 임시로 멤버만 들어가 있습니다. 팔로워, 여행일지, 지역시 추가해야합니다
+	}
 }

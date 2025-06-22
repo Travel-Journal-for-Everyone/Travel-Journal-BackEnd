@@ -33,7 +33,6 @@ import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.photo.dto.PhotoMetadataRequest;
 import com.traveljournal.domain.photo.entity.Photo;
-import com.traveljournal.domain.photo.repository.PhotoRepository;
 import com.traveljournal.domain.photo.service.PhotoService;
 import com.traveljournal.domain.statistics.service.MemberRegionStatisticsService;
 import com.traveljournal.domain.statistics.service.MemberStatisticsService;
@@ -51,7 +50,6 @@ public class JournalService {
 	private final ImageInfoService imageInfoService;
 	private final MemberRegionStatisticsService memberRegionStatisticsService;
 	private final ImageService imageService;
-	private final PhotoRepository photoRepository;
 	private final MemberService memberService;
 	private final BlockService blockService;
 	private final MemberStatisticsService memberStatisticsService;

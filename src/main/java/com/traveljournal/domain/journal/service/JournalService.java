@@ -31,13 +31,17 @@ import com.traveljournal.domain.journal.entity.JournalDaySpot;
 import com.traveljournal.domain.journal.repository.JournalRepository;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.service.MemberService;
-import com.traveljournal.domain.statistics.entity.MemberStatistics;
-import com.traveljournal.domain.statistics.repository.MemberStatisticsRepository;
 import com.traveljournal.domain.photo.dto.PhotoMetadataRequest;
 import com.traveljournal.domain.photo.entity.Photo;
 import com.traveljournal.domain.photo.repository.PhotoRepository;
+import com.traveljournal.domain.statistics.entity.MemberRegionStatistics;
+import com.traveljournal.domain.statistics.entity.MemberRegionStatisticsId;
+import com.traveljournal.domain.statistics.entity.MemberStatistics;
+import com.traveljournal.domain.statistics.repository.MemberRegionStatisticsRepository;
+import com.traveljournal.domain.statistics.repository.MemberStatisticsRepository;
 import com.traveljournal.global.exception.BadRequestException;
 import com.traveljournal.global.util.RegionGroupUtil;
+import com.traveljournal.global.util.RegionNormalizer;
 
 import lombok.RequiredArgsConstructor;
 
@@ -49,6 +53,7 @@ public class JournalService {
 	private final HashTagRepository hashTagRepository;
 	private final ImageInfoRepository imageInfoRepository;
 	private final MemberStatisticsRepository memberStatisticsRepository;
+	private final MemberRegionStatisticsRepository memberRegionStatisticsRepository;
 	private final ImageService imageService;
 	private final PhotoRepository photoRepository;
 	private final MemberService memberService;
@@ -119,6 +124,17 @@ public class JournalService {
 		MemberStatistics stats = memberStatisticsRepository.findById(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("통계 정보 없음"));
 		stats.increaseTravelDiaryCount();
+
+		String rawRegion = journal.getRegion();
+		String regionGroup = RegionNormalizer.normalize(rawRegion);
+		MemberRegionStatisticsId regionStatsId = new MemberRegionStatisticsId(memberId, regionGroup);
+
+		MemberRegionStatistics regionStats = memberRegionStatisticsRepository.findById(regionStatsId)
+			.orElseGet(() -> {
+				MemberRegionStatistics newStats = new MemberRegionStatistics(regionStatsId, 0L, 0L);
+				return memberRegionStatisticsRepository.save(newStats);
+			});
+		regionStats.increaseTravelDiaryCount();
 
 		return journal.getId();
 	}

@@ -22,4 +22,7 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
     List<Long> findBlockedMemberIdsByBlockerId(@Param("blockerId") Long blockerId);
 
     boolean existsByBlockerIdAndBlockedId(Long blockerId, Long blockedId);
+
+    @Query("SELECT b.blocker.id FROM Block b WHERE b.blocked.id = :blockedId")
+    List<Long> findBlockerIdsByBlockedId(@Param("blockedId") Long blockedId);
 }

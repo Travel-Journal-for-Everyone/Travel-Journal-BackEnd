@@ -21,75 +21,80 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class BlockService {
-    private final BlockRepository blockRepository;
-    private final MemberService memberService;
-    private Member findMemberById(Long id) {return memberService.findById(id);}
-    @Transactional
-    public void blockMember(Long blockerId, Long blockedId) {
+	private final BlockRepository blockRepository;
+	private final MemberService memberService;
 
-        Member blocker = findMemberById(blockerId);
-        Member blocked = findMemberById(blockedId);
+	private Member findMemberById(Long id) {
+		return memberService.findById(id);
+	}
 
-        if (blockRepository.existsByBlockerAndBlocked(blocker, blocked)) {
-            throw new BlockBadRequestException("이미 차단한 사용자입니다.");
-        }
+	@Transactional
+	public void blockMember(Long blockerId, Long blockedId) {
 
-        Block block = Block.builder()
-                .blocker(blocker)
-                .blocked(blocked)
-                .build();
+		Member blocker = findMemberById(blockerId);
+		Member blocked = findMemberById(blockedId);
 
-        blockRepository.save(block);
-    }
+		if (blockRepository.existsByBlockerAndBlocked(blocker, blocked)) {
+			throw new BlockBadRequestException("이미 차단한 사용자입니다.");
+		}
 
-    public void unblockMember(Long blockerId, Long blockedId) {
-        Member blocker = findMemberById(blockerId);
-        Member blocked = findMemberById(blockedId);
+		Block block = Block.builder()
+			.blocker(blocker)
+			.blocked(blocked)
+			.build();
 
-        Block block = blockRepository.findByBlockerAndBlocked(blocker, blocked)
-                .orElseThrow(()-> new BlockBadRequestException("차단 내역이 없습니다."));
+		blockRepository.save(block);
+	}
 
-        blockRepository.delete(block);
-    }
+	public void unblockMember(Long blockerId, Long blockedId) {
+		Member blocker = findMemberById(blockerId);
+		Member blocked = findMemberById(blockedId);
 
-    @Transactional(readOnly = true)
-    public Page<BlockResponse> getBlockedMembers(Long blockerId, Pageable pageable) {
-        Member blocker = findMemberById(blockerId);
-        return blockRepository.findAllByBlocker(blocker, pageable)
-                .map(block -> BlockResponse.of(block.getBlocked()));
-    }
+		Block block = blockRepository.findByBlockerAndBlocked(blocker, blocked)
+			.orElseThrow(() -> new BlockBadRequestException("차단 내역이 없습니다."));
 
-    @Transactional(readOnly = true)
-    public boolean isBlocked(Member viewer, Member target) {
-        return blockRepository.existsByBlockerAndBlocked(viewer, target) ||
-                blockRepository.existsByBlockerAndBlocked(target, viewer);
-    }
+		blockRepository.delete(block);
+	}
 
-    private BlockRelationType getBlockRelation(Long viewerId, Long memberId) {
-        boolean blockedByMe = blockRepository.existsByBlockerIdAndBlockedId(viewerId, memberId);
-        boolean blockedMe = blockRepository.existsByBlockerIdAndBlockedId(memberId, viewerId);
+	@Transactional(readOnly = true)
+	public Page<BlockResponse> getBlockedMembers(Long blockerId, Pageable pageable) {
+		Member blocker = findMemberById(blockerId);
+		return blockRepository.findAllByBlocker(blocker, pageable)
+			.map(block -> BlockResponse.of(block.getBlocked()));
+	}
 
-        if (blockedByMe && blockedMe) {
-            return BlockRelationType.MUTUAL_BLOCK;
-        } else if (blockedByMe) {
-            return BlockRelationType.BLOCKED_BY_ME;
-        } else if (blockedMe) {
-            return BlockRelationType.BLOCKED_ME;
-        } else {
-            return BlockRelationType.NONE;
-        }
-    }
+	@Transactional(readOnly = true)
+	public boolean isBlocked(Member viewer, Member target) {
+		return blockRepository.existsByBlockerAndBlocked(viewer, target) ||
+			blockRepository.existsByBlockerAndBlocked(target, viewer);
+	}
 
-    @Transactional(readOnly = true)
-    public List<Long> getBlockedMemberIds(Long viewerId) {
-        return blockRepository.findBlockedMemberIdsByBlockerId(viewerId);
-    }
+	@Transactional(readOnly = true)
+	public BlockRelationType getBlockRelation(Long viewerId, Long memberId) {
+		boolean blockedByMe = blockRepository.existsByBlockerIdAndBlockedId(viewerId, memberId);
+		boolean blockedMe = blockRepository.existsByBlockerIdAndBlockedId(memberId, viewerId);
 
-    @Transactional
-    public void validateNotBlocked(Long viewerId, Long memberId) {
-        BlockRelationType relation = getBlockRelation(viewerId, memberId);
-        if (relation != BlockRelationType.NONE) {
-            throw new ForbiddenException("차단된 회원입니다.");
-        }
-    }
+		if (blockedByMe && blockedMe) {
+			return BlockRelationType.MUTUAL_BLOCK;
+		} else if (blockedByMe) {
+			return BlockRelationType.BLOCKED_BY_ME;
+		} else if (blockedMe) {
+			return BlockRelationType.BLOCKED_ME;
+		} else {
+			return BlockRelationType.NONE;
+		}
+	}
+
+	@Transactional(readOnly = true)
+	public List<Long> getBlockedMemberIds(Long viewerId) {
+		return blockRepository.findBlockedMemberIdsByBlockerId(viewerId);
+	}
+
+	@Transactional(readOnly = true)
+	public void validateNotBlocked(Long viewerId, Long memberId) {
+		BlockRelationType relation = getBlockRelation(viewerId, memberId);
+		if (relation != BlockRelationType.NONE) {
+			throw new ForbiddenException("차단된 회원입니다.");
+		}
+	}
 }

@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.auth.dto.SocialMemberInfo;
+import com.traveljournal.domain.block.dto.BlockRelationType;
 import com.traveljournal.domain.member.dto.MemberProfileResponse;
 import com.traveljournal.domain.member.dto.ProfileRequest;
 import com.traveljournal.domain.member.entity.AccountScope;
@@ -171,10 +172,15 @@ public class MemberService {
 	public MemberProfileResponse getMemberProfile(Long memberId) {
 
 		Member member = findById(memberId);
-		MemberStatistics stats = memberStatisticsRepository.findById(memberId)
-			.orElseThrow(() -> new IllegalArgumentException("통계 정보 없음"));
+		MemberStatistics stats = getMemberStatistics(memberId);
 
-		return MemberProfileResponse.of(member, stats);
+		return MemberProfileResponse.of(member, stats, BlockRelationType.NONE);
+	}
+
+	@Transactional(readOnly = true)
+	public MemberStatistics getMemberStatistics(Long memberId) {
+		return memberStatisticsRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("통계 정보 없음"));
 	}
 
 	@Transactional

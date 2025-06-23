@@ -1,6 +1,7 @@
 package com.traveljournal.domain.block.service;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -87,7 +88,12 @@ public class BlockService {
 
 	@Transactional(readOnly = true)
 	public List<Long> getBlockedMemberIds(Long viewerId) {
-		return blockRepository.findBlockedMemberIdsByBlockerId(viewerId);
+
+		List<Long> blockedByMe = blockRepository.findBlockedMemberIdsByBlockerId(viewerId);
+		List<Long> blockedMe = blockRepository.findBlockerIdsByBlockedId(viewerId);
+		return Stream.concat(blockedByMe.stream(), blockedMe.stream())
+			.distinct()
+			.toList();
 	}
 
 	@Transactional(readOnly = true)

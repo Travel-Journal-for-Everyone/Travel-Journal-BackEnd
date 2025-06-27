@@ -37,7 +37,7 @@ public class Photo {
 	private String description;
 
 	@Column(length = 255)
-	private String placeName;
+	private String address;
 
 	@Column(nullable = false)
 	private LocalDateTime takenDateTime;
@@ -55,10 +55,10 @@ public class Photo {
 	private ImageInfo imageInfo;
 
 	@Builder
-	public Photo(String description, String placeName, LocalDateTime takenDateTime,
+	public Photo(String description, String address, LocalDateTime takenDateTime,
 		Double latitude, Double longitude, ImageInfo imageInfo) {
 		this.description = description;
-		this.placeName = placeName;
+		this.address = address;
 		this.takenDateTime = takenDateTime;
 		this.latitude = latitude;
 		this.longitude = longitude;

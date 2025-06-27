@@ -181,8 +181,10 @@ public class JournalService {
 
 	private void addPhotosToDays(List<JournalDay> journalDays, List<PhotoMetadataRequest> photoMetas) {
 		Set<String> uniqueUploadIds = new HashSet<>();
+		int globalPhotoOrder = 1;
 		for (JournalDay day : journalDays) {
 			int dayNum = day.getDayNumber();
+			int dayPhotoOrder = 1;
 			for (PhotoMetadataRequest meta : photoMetas) {
 				if (meta.dayNumber() != dayNum)
 					continue;
@@ -201,6 +203,8 @@ public class JournalService {
 					.latitude(meta.latitude())
 					.longitude(meta.longitude())
 					.imageInfo(imageInfo)
+					.photoOrder(globalPhotoOrder++)
+					.dayPhotoOrder(dayPhotoOrder++)
 					.build();
 
 				day.addPhoto(photo);

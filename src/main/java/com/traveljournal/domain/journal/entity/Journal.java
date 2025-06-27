@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.BatchSize;
+
 import com.traveljournal.domain.hashtag.entity.HashTag;
 import com.traveljournal.domain.member.entity.Member;
 
@@ -55,6 +57,8 @@ public class Journal {
 	@Column(length = 512)
 	private String thumbnailUrl;
 
+	private String description;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member member;
@@ -66,10 +70,12 @@ public class Journal {
 		inverseJoinColumns = @JoinColumn(name = "hashtag_id")
 	)
 	@Builder.Default
+	@BatchSize(size = 10)
 	private List<HashTag> hashTags = new ArrayList<>();
 
 	@OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
+	@BatchSize(size = 10)
 	private List<JournalDay> daysDetail = new ArrayList<>();
 
 	@Column(name = "random_index")
@@ -86,7 +92,9 @@ public class Journal {
 		this.daysDetail.add(day);
 	}
 
-	public void setThumbnailUrl(String url) {
-		this.thumbnailUrl = url;
+	public void updateThumbnailUrl(String url) {
+		if (url != null && !url.trim().isEmpty()) {
+			this.thumbnailUrl = url.trim();
+		}
 	}
 }

@@ -57,4 +57,9 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleForbiddenException(ForbiddenException ex) {
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
 	}
+
+	@ExceptionHandler(JournalNotFoundException.class)
+	public ResponseEntity<String> handleJournalNotFound(JournalNotFoundException ex) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+	}
 }

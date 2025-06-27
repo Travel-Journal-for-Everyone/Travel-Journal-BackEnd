@@ -33,6 +33,12 @@ public class Photo {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(name = "photo_order", nullable = false)
+	private Integer photoOrder;
+
+	@Column(name = "day_photo_order", nullable = false)
+	private Integer dayPhotoOrder; //
+
 	@Column(length = 1000)
 	private String description;
 
@@ -56,13 +62,15 @@ public class Photo {
 
 	@Builder
 	public Photo(String description, String address, LocalDateTime takenDateTime,
-		Double latitude, Double longitude, ImageInfo imageInfo) {
+		Double latitude, Double longitude, ImageInfo imageInfo, Integer photoOrder, Integer dayPhotoOrder) {
 		this.description = description;
 		this.address = address;
 		this.takenDateTime = takenDateTime;
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.imageInfo = imageInfo;
+		this.photoOrder = photoOrder;
+		this.dayPhotoOrder = dayPhotoOrder;
 	}
 
 	public void assignJournalDay(JournalDay journalDay) {

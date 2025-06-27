@@ -47,6 +47,7 @@ public class JournalDay {
 	private Journal journal;
 
 	@OneToMany(mappedBy = "journalDay", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OrderBy("photoOrder ASC")
 	@Builder.Default
 	@BatchSize(size = 10)
 	private List<Photo> photos = new ArrayList<>();

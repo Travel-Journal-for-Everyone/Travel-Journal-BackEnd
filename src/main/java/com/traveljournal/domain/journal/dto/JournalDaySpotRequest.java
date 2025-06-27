@@ -1,5 +1,7 @@
 package com.traveljournal.domain.journal.dto;
 
+import com.traveljournal.domain.journal.entity.JournalDaySpot;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record JournalDaySpotRequest(
@@ -12,4 +14,12 @@ public record JournalDaySpotRequest(
 	@Schema(example = "126.82173888888889")
 	Double longitude
 ) {
+	public static JournalDaySpotRequest from(JournalDaySpot spot) {
+		return new JournalDaySpotRequest(
+			spot.getSpotOrder(),
+			spot.getSpotName(),
+			spot.getLatitude(),
+			spot.getLongitude()
+		);
+	}
 }

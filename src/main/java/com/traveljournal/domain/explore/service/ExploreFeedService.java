@@ -90,7 +90,6 @@ public class ExploreFeedService {
 		return new PageImpl<>(content, pageable, journalIdPage.getTotalElements());
 	}
 
-	// MODIFIED: 2025-06-25 - 빈 리스트 처리 및 쿼리 최적화
 	private Page<ExploreJournalFeedResponse> getOptimizedRandomFeed(
 		Long memberId, List<Long> followingIds, List<Long> seenJournalIds, List<Long> blockedIds, Pageable pageable) {
 
@@ -100,7 +99,8 @@ public class ExploreFeedService {
 		boolean hasSeenJournals = seenJournalIds != null && !seenJournalIds.isEmpty();
 
 		// 제외할 회원 ID 목록 구성
-		List<Long> excludeMemberIds = buildExcludeMemberIds(memberId, blockedIds, followingIds, hasBlockedMembers, hasFollowing);
+		List<Long> excludeMemberIds = buildExcludeMemberIds(memberId, blockedIds, followingIds, hasBlockedMembers,
+			hasFollowing);
 
 		// 빈 리스트 방지를 위한 더미 값 추가
 		if (excludeMemberIds.isEmpty()) {
@@ -135,13 +135,11 @@ public class ExploreFeedService {
 			.map(j -> ExploreJournalFeedResponse.of(j, j.getMember()))
 			.toList();
 
-		// MODIFIED: 2025-06-25 - 조건별 카운트 쿼리 호출
 		long totalElements = getTotalElementsCount(excludeMemberIds, seenJournalIds, hasSeenJournals);
 
 		return new PageImpl<>(content, pageable, totalElements);
 	}
 
-	// MODIFIED: 2025-06-25 - 제외 회원 ID 구성 로직 분리
 	private List<Long> buildExcludeMemberIds(Long memberId, List<Long> blockedIds, List<Long> followingIds,
 		boolean hasBlockedMembers, boolean hasFollowing) {
 
@@ -158,7 +156,6 @@ public class ExploreFeedService {
 		return excludeMemberIds.stream().distinct().toList();
 	}
 
-	// MODIFIED: 2025-06-25 - 랜덤 일지 ID 조회 로직 분리
 	private List<Long> getRandomJournalIds(List<Long> excludeMemberIds, List<Long> seenJournalIds,
 		boolean hasSeenJournals, int limit) {
 
@@ -173,8 +170,8 @@ public class ExploreFeedService {
 		}
 	}
 
-	// MODIFIED: 2025-06-25 - 총 개수 조회 로직 분리
-	private long getTotalElementsCount(List<Long> excludeMemberIds, List<Long> seenJournalIds, boolean hasSeenJournals) {
+	private long getTotalElementsCount(List<Long> excludeMemberIds, List<Long> seenJournalIds,
+		boolean hasSeenJournals) {
 		if (!hasSeenJournals) {
 			return journalRepository.countAvailableJournalsForRandomFeedWithoutSeen(excludeMemberIds);
 		} else {
@@ -184,7 +181,6 @@ public class ExploreFeedService {
 			return journalRepository.countAvailableJournalsForRandomFeedWithSeen(excludeMemberIds, seenJournalIds);
 		}
 	}
-
 
 	@Transactional
 	public void markJournalsAsSeen(Long memberId, List<Long> journalIds) {

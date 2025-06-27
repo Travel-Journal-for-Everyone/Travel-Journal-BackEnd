@@ -1,5 +1,10 @@
 package com.traveljournal.domain.photo.dto;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import com.traveljournal.domain.photo.entity.Photo;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record PhotoMetadataRequest(
@@ -20,4 +25,22 @@ public record PhotoMetadataRequest(
 	@Schema(example = "126.82173888888889")
 	Double longitude
 ) {
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+
+	public static PhotoMetadataRequest from(Photo photo) {
+		return new PhotoMetadataRequest(
+			photo.getImageInfo().getFilename(),
+			photo.getJournalDay().getDayNumber(),
+			photo.getDescription(),
+			photo.getImageInfo().getUploadFilename(),
+			formatDateTime(photo.getTakenDateTime()),
+			photo.getAddress(),
+			photo.getLatitude(),
+			photo.getLongitude()
+		);
+	}
+
+	private static String formatDateTime(LocalDateTime dateTime) {
+		return dateTime != null ? dateTime.format(DATE_TIME_FORMATTER) : null;
+	}
 }

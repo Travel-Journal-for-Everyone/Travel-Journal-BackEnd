@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.traveljournal.domain.journal.dto.JournalCreateRequest;
+import com.traveljournal.domain.journal.dto.JournalDetailResponse;
 import com.traveljournal.domain.journal.dto.JournalListResponse;
 import com.traveljournal.domain.journal.service.JournalService;
 import com.traveljournal.global.data.ApiResponseHandler;
@@ -86,5 +87,20 @@ public class JournalController {
 
 		Long journalId = journalService.createJournal(journalCreateRequest, currentMemberId);
 		return ApiResponseHandler.onSuccess("여행일지 작성 성공 journal_id: " + journalId);
+	}
+
+	@GetMapping("/members/journals/{journalId}")
+	@Operation(
+		summary = "여행일지 상세 조회",
+		description = "특정 여행일지의 상세 정보를 조회합니다.",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
+	public ResponseEntity<JournalDetailResponse> getJournalDetail(
+		@Parameter(description = "조회할 journal_id")
+		@PathVariable Long journalId
+	) {
+		Long currentMemberId = SecurityUtil.getCurrentMemberId();
+
+		return ApiResponseHandler.getObjectSuccess(journalService.getJournalDetail(journalId, currentMemberId));
 	}
 }

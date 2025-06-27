@@ -49,20 +49,6 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
 	Page<Long> findIdsByKeywordExcludingBlockedMembers(@Param("keyword") String keyword,
 		@Param("blockedMemberIds") List<Long> blockedMemberIds, Pageable pageable);
 
-	@Query(value = """
-		SELECT j.id FROM journal j 
-		WHERE j.member_id NOT IN (:memberIds) 
-		AND (:excludeJournalIds IS NULL OR j.id NOT IN (:excludeJournalIds))
-		AND j.random_index >= RAND()
-		ORDER BY j.random_index
-		LIMIT :limit
-		""", nativeQuery = true)
-	List<Long> findOptimizedRandomIdsByMemberIdNotIn(
-		@Param("memberIds") List<Long> memberIds,
-		@Param("excludeJournalIds") List<Long> excludeJournalIds,
-		@Param("limit") int limit
-	);
-
 	@Query("""
 		SELECT j.id FROM Journal j
 		WHERE j.member.id = :memberId
@@ -99,17 +85,39 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
 		@Param("seenIds") List<Long> seenIds);
 
 	@Query(value = """
+        SELECT j.id FROM journal j
+        WHERE j.member_id NOT IN (:memberIds)
+        AND j.random_index >= RAND()
+        ORDER BY j.random_index
+        LIMIT :limit
+        """, nativeQuery = true)
+	List<Long> findRandomIdsByMemberIdNotIn(
+		@Param("memberIds") List<Long> memberIds,
+		@Param("limit") int limit
+	);
+
+	@Query(value = """
 		SELECT j.id FROM journal j
 		WHERE j.member_id NOT IN (:memberIds)
+		AND j.id NOT IN (:excludeJournalIds)
+		AND j.random_index >= RAND()
 		ORDER BY j.random_index
 		LIMIT :limit
 		""", nativeQuery = true)
-	List<Long> findRandomIdsByMemberIdNotIn(
+	List<Long> findRandomIdsByMemberIdNotInAndIdNotIn(
 		@Param("memberIds") List<Long> memberIds,
+		@Param("excludeJournalIds") List<Long> excludeJournalIds,
 		@Param("limit") int limit
 	);
 
 	@Modifying
 	@Query(value = "UPDATE journal SET random_index = RAND()", nativeQuery = true)
 	void updateRandomIndex();
+
+	@Query("SELECT COUNT(j) FROM Journal j WHERE j.member.id NOT IN :excludeMemberIds")
+	long countAvailableJournalsForRandomFeedWithoutSeen(@Param("excludeMemberIds") List<Long> excludeMemberIds);
+
+	@Query("SELECT COUNT(j) FROM Journal j WHERE j.member.id NOT IN :excludeMemberIds AND j.id NOT IN :seenIds")
+	long countAvailableJournalsForRandomFeedWithSeen(@Param("excludeMemberIds") List<Long> excludeMemberIds,
+		@Param("seenIds") List<Long> seenIds);
 }

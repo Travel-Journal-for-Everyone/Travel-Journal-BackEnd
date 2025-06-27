@@ -90,6 +90,7 @@ public class ExploreFeedService {
 		return new PageImpl<>(content, pageable, journalIdPage.getTotalElements());
 	}
 
+	// MODIFIED: 2025-06-25 - 빈 리스트 처리 및 쿼리 최적화
 	private Page<ExploreJournalFeedResponse> getOptimizedRandomFeed(
 		Long memberId, List<Long> followingIds, List<Long> seenJournalIds, List<Long> blockedIds, Pageable pageable) {
 
@@ -98,34 +99,24 @@ public class ExploreFeedService {
 		boolean hasFollowing = followingIds != null && !followingIds.isEmpty();
 		boolean hasSeenJournals = seenJournalIds != null && !seenJournalIds.isEmpty();
 
-		List<Long> excludeMemberIds = new ArrayList<>();
-		excludeMemberIds.add(memberId);
-		if (hasBlockedMembers) {
-			excludeMemberIds.addAll(blockedIds);
-		}
-		if (hasFollowing) {
-			excludeMemberIds.addAll(followingIds);
-		}
-		excludeMemberIds = excludeMemberIds.stream().distinct().toList();
+		// 제외할 회원 ID 목록 구성
+		List<Long> excludeMemberIds = buildExcludeMemberIds(memberId, blockedIds, followingIds, hasBlockedMembers, hasFollowing);
 
-		List<Long> randomJournalIds;
+		// 빈 리스트 방지를 위한 더미 값 추가
+		if (excludeMemberIds.isEmpty()) {
+			excludeMemberIds = List.of(-1L); // 존재하지 않는 ID로 더미 처리
+		}
 
-		if (!hasSeenJournals) {
+		List<Long> randomJournalIds = getRandomJournalIds(excludeMemberIds, seenJournalIds, hasSeenJournals, limit);
+
+		// 결과가 없으면 seen 조건 없이 재시도
+		if (randomJournalIds.isEmpty() && hasSeenJournals) {
 			randomJournalIds = journalRepository.findRandomIdsByMemberIdNotIn(excludeMemberIds, limit);
-		} else {
-			randomJournalIds = journalRepository.findOptimizedRandomIdsByMemberIdNotIn(
-				excludeMemberIds, seenJournalIds, limit
-			);
 		}
 
+		// 여전히 결과가 없으면 빈 페이지 반환
 		if (randomJournalIds.isEmpty()) {
-			if (!hasSeenJournals) {
-				randomJournalIds = journalRepository.findRandomIdsByMemberIdNotIn(excludeMemberIds, limit);
-			} else {
-				randomJournalIds = journalRepository.findOptimizedRandomIdsByMemberIdNotIn(
-					excludeMemberIds, seenJournalIds, limit
-				);
-			}
+			return new PageImpl<>(List.of(), pageable, 0);
 		}
 
 		List<Journal> journals = journalRepository.findAllByIdInFetchJoin(randomJournalIds);
@@ -144,11 +135,56 @@ public class ExploreFeedService {
 			.map(j -> ExploreJournalFeedResponse.of(j, j.getMember()))
 			.toList();
 
-		long totalElements = journalRepository.countAvailableJournalsForRandomFeed(excludeMemberIds,
-			hasSeenJournals ? seenJournalIds : List.of());
+		// MODIFIED: 2025-06-25 - 조건별 카운트 쿼리 호출
+		long totalElements = getTotalElementsCount(excludeMemberIds, seenJournalIds, hasSeenJournals);
 
 		return new PageImpl<>(content, pageable, totalElements);
 	}
+
+	// MODIFIED: 2025-06-25 - 제외 회원 ID 구성 로직 분리
+	private List<Long> buildExcludeMemberIds(Long memberId, List<Long> blockedIds, List<Long> followingIds,
+		boolean hasBlockedMembers, boolean hasFollowing) {
+
+		List<Long> excludeMemberIds = new ArrayList<>();
+		excludeMemberIds.add(memberId);
+
+		if (hasBlockedMembers) {
+			excludeMemberIds.addAll(blockedIds);
+		}
+		if (hasFollowing) {
+			excludeMemberIds.addAll(followingIds);
+		}
+
+		return excludeMemberIds.stream().distinct().toList();
+	}
+
+	// MODIFIED: 2025-06-25 - 랜덤 일지 ID 조회 로직 분리
+	private List<Long> getRandomJournalIds(List<Long> excludeMemberIds, List<Long> seenJournalIds,
+		boolean hasSeenJournals, int limit) {
+
+		if (!hasSeenJournals) {
+			return journalRepository.findRandomIdsByMemberIdNotIn(excludeMemberIds, limit);
+		} else {
+			// 빈 리스트 방지
+			if (seenJournalIds.isEmpty()) {
+				seenJournalIds = List.of(-1L);
+			}
+			return journalRepository.findRandomIdsByMemberIdNotInAndIdNotIn(excludeMemberIds, seenJournalIds, limit);
+		}
+	}
+
+	// MODIFIED: 2025-06-25 - 총 개수 조회 로직 분리
+	private long getTotalElementsCount(List<Long> excludeMemberIds, List<Long> seenJournalIds, boolean hasSeenJournals) {
+		if (!hasSeenJournals) {
+			return journalRepository.countAvailableJournalsForRandomFeedWithoutSeen(excludeMemberIds);
+		} else {
+			if (seenJournalIds.isEmpty()) {
+				seenJournalIds = List.of(-1L);
+			}
+			return journalRepository.countAvailableJournalsForRandomFeedWithSeen(excludeMemberIds, seenJournalIds);
+		}
+	}
+
 
 	@Transactional
 	public void markJournalsAsSeen(Long memberId, List<Long> journalIds) {

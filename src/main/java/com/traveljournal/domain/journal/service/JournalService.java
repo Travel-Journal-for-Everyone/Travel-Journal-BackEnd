@@ -18,12 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.traveljournal.domain.Image.entity.ImageInfo;
 import com.traveljournal.domain.Image.service.ImageInfoService;
 import com.traveljournal.domain.Image.service.ImageService;
+import com.traveljournal.domain.block.dto.BlockRelationType;
 import com.traveljournal.domain.block.service.BlockService;
 import com.traveljournal.domain.hashtag.entity.HashTag;
 import com.traveljournal.domain.hashtag.service.HashTagService;
 import com.traveljournal.domain.journal.dto.JournalCreateRequest;
 import com.traveljournal.domain.journal.dto.JournalDayRequest;
 import com.traveljournal.domain.journal.dto.JournalDaySpotRequest;
+import com.traveljournal.domain.journal.dto.JournalDetailResponse;
 import com.traveljournal.domain.journal.dto.JournalListResponse;
 import com.traveljournal.domain.journal.entity.Journal;
 import com.traveljournal.domain.journal.entity.JournalDay;
@@ -37,6 +39,7 @@ import com.traveljournal.domain.photo.service.PhotoService;
 import com.traveljournal.domain.statistics.service.MemberRegionStatisticsService;
 import com.traveljournal.domain.statistics.service.MemberStatisticsService;
 import com.traveljournal.global.exception.BadRequestException;
+import com.traveljournal.global.exception.JournalNotFoundException;
 import com.traveljournal.global.util.RegionGroupUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -147,6 +150,7 @@ public class JournalService {
 			.endDate(request.endDate())
 			.member(member)
 			.hashTags(tags)
+			.description(request.description())
 			.createdAt(LocalDateTime.now())
 			.build();
 	}
@@ -191,7 +195,7 @@ public class JournalService {
 
 				Photo photo = Photo.builder()
 					.description(meta.description())
-					.placeName(meta.address())
+					.address(meta.address())
 					.takenDateTime(
 						LocalDateTime.parse(meta.takenDateTime(), DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")))
 					.latitude(meta.latitude())
@@ -210,6 +214,15 @@ public class JournalService {
 			Photo firstPhoto = journalDays.get(0).getPhotos().get(0);
 			thumbnailUrl = imageService.getImageUrl(firstPhoto.getImageInfo().getFilename());
 		}
-		journal.setThumbnailUrl(thumbnailUrl);
+		journal.updateThumbnailUrl(thumbnailUrl);
+	}
+
+	@Transactional(readOnly = true)
+	public JournalDetailResponse getJournalDetail(Long journalId, Long currentMemberId) {
+		Journal journal = journalRepository.findById(journalId)
+			.orElseThrow(() -> new JournalNotFoundException("해당하는 여행일지가 없습니다."));
+
+		BlockRelationType blockRelationType = blockService.getBlockRelation(currentMemberId, journal.getMember().getId());
+		return JournalDetailResponse.of(journal, blockRelationType, imageService);
 	}
 }

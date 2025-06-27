@@ -3,6 +3,8 @@ package com.traveljournal.domain.journal.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.BatchSize;
+
 import com.traveljournal.domain.photo.entity.Photo;
 
 import jakarta.persistence.CascadeType;
@@ -46,11 +48,13 @@ public class JournalDay {
 
 	@OneToMany(mappedBy = "journalDay", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
+	@BatchSize(size = 10)
 	private List<Photo> photos = new ArrayList<>();
 
 	@OneToMany(mappedBy = "journalDay", cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("spotOrder ASC")
 	@Builder.Default
+	@BatchSize(size = 10)
 	private List<JournalDaySpot> spots = new ArrayList<>();
 
 	public void addPhoto(Photo photo) {

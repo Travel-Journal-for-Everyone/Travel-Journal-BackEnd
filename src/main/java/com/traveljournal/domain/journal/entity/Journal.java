@@ -2,12 +2,17 @@ package com.traveljournal.domain.journal.entity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import org.hibernate.annotations.BatchSize;
 
+import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.hashtag.entity.HashTag;
 import com.traveljournal.domain.member.entity.Member;
+import com.traveljournal.domain.photo.dto.PhotoListResponse;
+import com.traveljournal.domain.photo.entity.Photo;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -96,5 +101,29 @@ public class Journal {
 		if (url != null && !url.trim().isEmpty()) {
 			this.thumbnailUrl = url.trim();
 		}
+	}
+
+	public List<PhotoListResponse> getPhotosAsResponse(ImageService imageService) {
+		return this.daysDetail.stream()
+			.flatMap(day -> day.getPhotos().stream())
+			.sorted(Comparator.comparing(Photo::getPhotoOrder))
+			.map(photo -> PhotoListResponse.from(photo,
+				imageService.getImageUrl(photo.getImageInfo().getFilename())))
+			.toList();
+	}
+
+	public boolean hasPhotos() {
+		return this.daysDetail.stream()
+			.anyMatch(day -> !day.getPhotos().isEmpty());
+	}
+
+	public List<PhotoListResponse> getDayPhotosAsResponse(Integer dayNumber, ImageService imageService) {
+		return this.daysDetail.stream()
+			.filter(day -> Objects.equals(day.getDayNumber(), dayNumber))
+			.flatMap(day -> day.getPhotos().stream())
+			.sorted(Comparator.comparing(Photo::getDaySpotOrder))
+			.map(photo -> PhotoListResponse.from(photo,
+				imageService.getImageUrl(photo.getImageInfo().getFilename())))
+			.toList();
 	}
 }

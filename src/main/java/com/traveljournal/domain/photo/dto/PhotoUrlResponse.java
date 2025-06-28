@@ -1,6 +1,6 @@
 package com.traveljournal.domain.photo.dto;
 
-import com.traveljournal.domain.Image.entity.ImageInfo;
+import com.traveljournal.domain.photo.entity.Photo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -10,13 +10,18 @@ public record PhotoUrlResponse(
 	@Schema(example = "https://travel-journal-s3.s3.amazonaws.com/source/journal_photo_20_1750242032088_99a07d36.jpeg")
 	String photoUrl,
 	@Schema(example = "1")
-	Integer photoOrder
+	Integer photoOrder,
+	Integer daySpotOrder,
+	@Schema(example = "1", description = "몇 일차 사진인지")
+	Integer dayNumber
 ) {
-	public static PhotoUrlResponse from(ImageInfo imageInfo, String photoUrl, Integer photoOrder) {
+	public static PhotoUrlResponse from(Photo photo, String photoUrl) {
 		return new PhotoUrlResponse(
-			imageInfo.getFilename(),
+			photo.getImageInfo().getFilename(),
 			photoUrl,
-			photoOrder
-		);
+			photo.getPhotoOrder(),
+			photo.getDaySpotOrder(),
+			photo.getJournalDay().getDayNumber()
+			);
 	}
 }

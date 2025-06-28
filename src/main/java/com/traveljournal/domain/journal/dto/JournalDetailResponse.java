@@ -50,9 +50,8 @@ public record JournalDetailResponse(
 			journal.getDaysDetail().stream()
 				.flatMap(day -> day.getPhotos().stream())
 				.map(photo -> PhotoUrlResponse.from(
-					photo.getImageInfo(),
-					imageService.getImageUrl(photo.getImageInfo().getFilename()),
-					photo.getPhotoOrder()
+					photo,
+					imageService.getImageUrl(photo.getImageInfo().getFilename())
 				))
 				.toList(),
 			blockRelationType

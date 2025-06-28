@@ -36,8 +36,8 @@ public class Photo {
 	@Column(name = "photo_order", nullable = false)
 	private Integer photoOrder;
 
-	@Column(name = "day_photo_order", nullable = false)
-	private Integer dayPhotoOrder; //
+	@Column(name = "day_spot_order", nullable = false)
+	private Integer daySpotOrder;
 
 	@Column(length = 1000)
 	private String description;
@@ -62,7 +62,7 @@ public class Photo {
 
 	@Builder
 	public Photo(String description, String address, LocalDateTime takenDateTime,
-		Double latitude, Double longitude, ImageInfo imageInfo, Integer photoOrder, Integer dayPhotoOrder) {
+		Double latitude, Double longitude, ImageInfo imageInfo, Integer photoOrder, Integer daySpotOrder) {
 		this.description = description;
 		this.address = address;
 		this.takenDateTime = takenDateTime;
@@ -70,7 +70,7 @@ public class Photo {
 		this.longitude = longitude;
 		this.imageInfo = imageInfo;
 		this.photoOrder = photoOrder;
-		this.dayPhotoOrder = dayPhotoOrder;
+		this.daySpotOrder = daySpotOrder;
 	}
 
 	public void assignJournalDay(JournalDay journalDay) {

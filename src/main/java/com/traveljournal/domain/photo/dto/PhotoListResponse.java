@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record PhotoListResponse(
 	@Schema(example = "1")
+	Integer photoOrder,
+	@Schema(example = "1")
 	Integer daySpotOrder,
 	@Schema(example = "journal_photo_20_1750242032088_99a07d36.jpeg")
 	String uploadId,
@@ -28,6 +30,7 @@ public record PhotoListResponse(
 ) {
 	public static PhotoListResponse from(Photo photo, String photoUrl) {
 		return new PhotoListResponse(
+			photo.getPhotoOrder(),
 			photo.getDaySpotOrder(),
 			photo.getImageInfo().getFilename(),
 			photoUrl,

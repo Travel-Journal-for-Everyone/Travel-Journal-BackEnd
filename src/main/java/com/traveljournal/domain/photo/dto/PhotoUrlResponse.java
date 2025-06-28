@@ -11,6 +11,7 @@ public record PhotoUrlResponse(
 	String photoUrl,
 	@Schema(example = "1")
 	Integer photoOrder,
+	@Schema(example = "1")
 	Integer daySpotOrder,
 	@Schema(example = "1", description = "몇 일차 사진인지")
 	Integer dayNumber

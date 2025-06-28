@@ -33,6 +33,7 @@ import com.traveljournal.domain.journal.entity.JournalDaySpot;
 import com.traveljournal.domain.journal.repository.JournalRepository;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.service.MemberService;
+import com.traveljournal.domain.photo.dto.PhotoListResponse;
 import com.traveljournal.domain.photo.dto.PhotoMetadataRequest;
 import com.traveljournal.domain.photo.entity.Photo;
 import com.traveljournal.domain.photo.service.PhotoService;
@@ -61,7 +62,7 @@ public class JournalService {
 	@Transactional(readOnly = true)
 	public Page<JournalListResponse> findJournalsByRegionWithPaging(Long memberId, Long viewerId, String regionName,
 		Pageable pageable) {
-		blockService.validateNotBlocked(viewerId, memberId);
+		validateAccess(viewerId, memberId);
 
 		List<String> regionList = RegionGroupUtil.getRegionList(regionName);
 		List<Long> blockedIds = blockService.getBlockedMemberIds(viewerId);
@@ -72,7 +73,7 @@ public class JournalService {
 
 	@Transactional(readOnly = true)
 	public Page<JournalListResponse> findAllJournalsByMemberId(Long memberId, Long viewerId, Pageable pageable) {
-		blockService.validateNotBlocked(viewerId, memberId);
+		validateAccess(viewerId, memberId);
 
 		List<Long> blockedIds = blockService.getBlockedMemberIds(viewerId);
 		Page<Long> journalIdPage = journalRepository.findIdsByMemberIdExcludingBlocked(memberId, blockedIds, pageable);
@@ -116,7 +117,7 @@ public class JournalService {
 
 		addPhotosToDays(journalDays, request.photoMetadataList());
 
-		setThumbnailUrl(journal, journalDays);
+		setThumbnailUrl(journal, journalDays, request.thumbnailUploadId());
 
 		journalRepository.save(journal);
 
@@ -184,7 +185,7 @@ public class JournalService {
 		int globalPhotoOrder = 1;
 		for (JournalDay day : journalDays) {
 			int dayNum = day.getDayNumber();
-			int dayPhotoOrder = 1;
+			int daySpotOrder = 1;
 			for (PhotoMetadataRequest meta : photoMetas) {
 				if (meta.dayNumber() != dayNum)
 					continue;
@@ -204,7 +205,7 @@ public class JournalService {
 					.longitude(meta.longitude())
 					.imageInfo(imageInfo)
 					.photoOrder(globalPhotoOrder++)
-					.dayPhotoOrder(dayPhotoOrder++)
+					.daySpotOrder(daySpotOrder++)
 					.build();
 
 				day.addPhoto(photo);
@@ -212,9 +213,19 @@ public class JournalService {
 		}
 	}
 
-	private void setThumbnailUrl(Journal journal, List<JournalDay> journalDays) {
+	private void setThumbnailUrl(Journal journal, List<JournalDay> journalDays, String thumbnailUploadId) {
 		String thumbnailUrl = null;
-		if (!journalDays.isEmpty() && !journalDays.get(0).getPhotos().isEmpty()) {
+		if(thumbnailUploadId != null) {
+			boolean isValidThumbnail = journalDays.stream()
+				.flatMap(day -> day.getPhotos().stream())
+				.anyMatch(photo -> photo.getImageInfo().getFilename().equals(thumbnailUploadId));
+
+			if (isValidThumbnail) {
+				thumbnailUrl = imageService.getImageUrl(thumbnailUploadId);
+			}
+		}
+
+		if (thumbnailUrl == null && !journalDays.isEmpty() && !journalDays.get(0).getPhotos().isEmpty()) {
 			Photo firstPhoto = journalDays.get(0).getPhotos().get(0);
 			thumbnailUrl = imageService.getImageUrl(firstPhoto.getImageInfo().getFilename());
 		}
@@ -228,5 +239,27 @@ public class JournalService {
 
 		BlockRelationType blockRelationType = blockService.getBlockRelation(currentMemberId, journal.getMember().getId());
 		return JournalDetailResponse.of(journal, blockRelationType, imageService);
+	}
+
+	@Transactional(readOnly = true)
+	public List<PhotoListResponse> getJournalPhotos(Long journalId, Long viewerId) {
+		Journal journal = journalRepository.findById(journalId)
+			.orElseThrow(() -> new JournalNotFoundException("해당하는 여행일지가 없습니다."));
+
+		validateAccess(viewerId, journal.getMember().getId());
+		return journal.getPhotosAsResponse(imageService);
+	}
+
+	@Transactional(readOnly = true)
+	public List<PhotoListResponse> getDayPhotos(Long journalId, Integer dayNumber, Long viewerId) {
+		Journal journal = journalRepository.findById(journalId)
+			.orElseThrow(() -> new JournalNotFoundException("해당하는 여행일지가 없습니다."));
+
+		validateAccess(viewerId, journal.getMember().getId());
+		return journal.getDayPhotosAsResponse(dayNumber, imageService);
+	}
+
+	private void validateAccess(Long viewerId, Long memberId) {
+		blockService.validateNotBlocked(viewerId, memberId);
 	}
 }

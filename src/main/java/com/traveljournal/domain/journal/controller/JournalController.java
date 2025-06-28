@@ -1,5 +1,7 @@
 package com.traveljournal.domain.journal.controller;
 
+import java.util.List;
+
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import com.traveljournal.domain.journal.dto.JournalCreateRequest;
 import com.traveljournal.domain.journal.dto.JournalDetailResponse;
 import com.traveljournal.domain.journal.dto.JournalListResponse;
 import com.traveljournal.domain.journal.service.JournalService;
+import com.traveljournal.domain.photo.dto.PhotoListResponse;
 import com.traveljournal.global.data.ApiResponseHandler;
 import com.traveljournal.global.security.util.SecurityUtil;
 
@@ -102,5 +105,36 @@ public class JournalController {
 		Long currentMemberId = SecurityUtil.getCurrentMemberId();
 
 		return ApiResponseHandler.getObjectSuccess(journalService.getJournalDetail(journalId, currentMemberId));
+	}
+
+
+	@GetMapping("/members/journals/{journalId}/photos")
+	@Operation(
+		summary = "여행일지 사진 조회",
+		description = "특정 여행일지의 모든 사진을 조회합니다.",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
+	public ResponseEntity<List<PhotoListResponse>> getJournalPhotos(
+		@Parameter(description = "여행일지 ID", required = true)
+		@PathVariable Long journalId) {
+
+		Long memberId = SecurityUtil.getCurrentMemberId();
+		return ApiResponseHandler.getObjectSuccess(journalService.getJournalPhotos(journalId, memberId));
+	}
+
+	@GetMapping("/members/journals/{journalId}/days/{dayNumber}/photos")
+	@Operation(
+		summary = "여행일지 특정 일차 사진 조회",
+		description = "특정 여행일지의 특정 일차 사진들을 조회합니다.",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
+	public ResponseEntity<List<PhotoListResponse>> getDayPhotos(
+		@Parameter(description = "여행일지 ID", required = true)
+		@PathVariable Long journalId,
+		@Parameter(description = "일차 (1일차, 2일차...)", required = true)
+		@PathVariable Integer dayNumber) {
+
+		Long memberId = SecurityUtil.getCurrentMemberId();
+		return ApiResponseHandler.getObjectSuccess(journalService.getDayPhotos(journalId, dayNumber, memberId));
 	}
 }

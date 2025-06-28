@@ -24,6 +24,8 @@ public record JournalCreateRequest(
 	@Schema(example = "설명")
 	String description,
 	List<JournalDayRequest> journalDays,
-	List<PhotoMetadataRequest> photoMetadataList
+	List<PhotoMetadataRequest> photoMetadataList,
+	@Schema(description = "썸네일 업로드, 지정하지 않을 시 첫번째 사진으로 등록", example = "journal_photo_20_1750242032088_99a07d36.jpeg")
+	String 	thumbnailUploadId
 ) {
 }

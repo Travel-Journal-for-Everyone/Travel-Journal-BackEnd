@@ -2,6 +2,7 @@ package com.traveljournal.domain.explore.dto;
 
 import java.util.List;
 
+import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.hashtag.entity.HashTag;
 import com.traveljournal.domain.journal.entity.Journal;
 import com.traveljournal.domain.member.entity.Member;
@@ -40,7 +41,7 @@ public record ExploreJournalFeedResponse(
 	@Schema(example = "https://travel-journal-s3.s3.amazonaws.com/default/profile/default1.png")
 	String profileImageUrl
 ) {
-	public static ExploreJournalFeedResponse of(Journal journal, Member member) {
+	public static ExploreJournalFeedResponse of(Journal journal, Member member, ImageService imageService) {
 		return ExploreJournalFeedResponse.builder()
 			.journalId(journal.getId())
 			.title(journal.getTitle())
@@ -50,7 +51,7 @@ public record ExploreJournalFeedResponse(
 			.days(journal.getDays())
 			.startDate(journal.getStartDate())
 			.endDate(journal.getEndDate())
-			.thumbnailUrl(journal.getThumbnailUrl())
+			.thumbnailUrl(journal.getThumbnailUrl(imageService))
 			.likeCount(100L)
 			.commentCount(972L)
 			.memberId(member.getId())

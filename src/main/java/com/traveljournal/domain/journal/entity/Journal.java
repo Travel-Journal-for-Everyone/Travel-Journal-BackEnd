@@ -59,9 +59,6 @@ public class Journal {
 
 	private LocalDateTime createdAt;
 
-	@Column(length = 512)
-	private String thumbnailUrl;
-
 	private String description;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -97,12 +94,6 @@ public class Journal {
 		this.daysDetail.add(day);
 	}
 
-	public void updateThumbnailUrl(String url) {
-		if (url != null && !url.trim().isEmpty()) {
-			this.thumbnailUrl = url.trim();
-		}
-	}
-
 	public List<PhotoListResponse> getPhotosAsResponse(ImageService imageService) {
 		return this.daysDetail.stream()
 			.flatMap(day -> day.getPhotos().stream())
@@ -125,5 +116,45 @@ public class Journal {
 			.map(photo -> PhotoListResponse.from(photo,
 				imageService.getImageUrl(photo.getImageInfo().getFilename())))
 			.toList();
+	}
+
+	public Photo getThumbnailPhoto() {
+		return this.daysDetail.stream()
+			.flatMap(day -> day.getPhotos().stream())
+			.filter(Photo::getIsThumbnail)
+			.findFirst()
+			.orElse(getFirstPhoto()); // fallback
+	}
+
+	public String getThumbnailUrl(ImageService imageService) {
+		Photo thumbnailPhoto = getThumbnailPhoto();
+		if (thumbnailPhoto != null) {
+			return imageService.getImageUrl(thumbnailPhoto.getImageInfo().getFilename());
+		}
+		return null;
+	}
+
+	public String getThumbnailAddress() {
+		Photo thumbnailPhoto = getThumbnailPhoto();
+		return thumbnailPhoto != null ? thumbnailPhoto.getAddress() : null;
+	}
+
+	private Photo getFirstPhoto() {
+		return this.daysDetail.stream()
+			.filter(day -> !day.getPhotos().isEmpty())
+			.findFirst()
+			.map(day -> day.getPhotos().get(0))
+			.orElse(null);
+	}
+
+	public void setThumbnail(Photo photo) {
+		// 기존 썸네일 해제
+		this.daysDetail.stream()
+			.flatMap(day -> day.getPhotos().stream())
+			.filter(Photo::getIsThumbnail)
+			.forEach(Photo::unsetAsThumbnail);
+
+		// 새 썸네일 설정
+		photo.setAsThumbnail();
 	}
 }

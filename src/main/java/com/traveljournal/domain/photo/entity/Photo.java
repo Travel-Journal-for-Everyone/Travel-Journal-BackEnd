@@ -52,6 +52,9 @@ public class Photo {
 
 	private Double longitude;
 
+	@Column(name = "is_thumbnail", nullable = false)
+	private Boolean isThumbnail = false;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "journal_day_id")
 	private JournalDay journalDay;
@@ -62,7 +65,7 @@ public class Photo {
 
 	@Builder
 	public Photo(String description, String address, LocalDateTime takenDateTime,
-		Double latitude, Double longitude, ImageInfo imageInfo, Integer photoOrder, Integer daySpotOrder) {
+		Double latitude, Double longitude, ImageInfo imageInfo, Integer photoOrder, Integer daySpotOrder, Boolean isThumbnail) {
 		this.description = description;
 		this.address = address;
 		this.takenDateTime = takenDateTime;
@@ -71,6 +74,15 @@ public class Photo {
 		this.imageInfo = imageInfo;
 		this.photoOrder = photoOrder;
 		this.daySpotOrder = daySpotOrder;
+		this.isThumbnail = isThumbnail != null ? isThumbnail : false;
+	}
+
+	public void setAsThumbnail() {
+		this.isThumbnail = true;
+	}
+
+	public void unsetAsThumbnail() {
+		this.isThumbnail = false;
 	}
 
 	public void assignJournalDay(JournalDay journalDay) {

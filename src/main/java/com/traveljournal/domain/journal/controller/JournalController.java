@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.traveljournal.domain.journal.dto.JournalCreateRequest;
 import com.traveljournal.domain.journal.dto.JournalDetailResponse;
 import com.traveljournal.domain.journal.dto.JournalListResponse;
+import com.traveljournal.domain.journal.dto.JournalListWebResponse;
 import com.traveljournal.domain.journal.service.JournalService;
 import com.traveljournal.domain.photo.dto.PhotoListResponse;
 import com.traveljournal.global.data.ApiResponseHandler;
@@ -59,7 +60,7 @@ public class JournalController {
 	}
 
 	@Operation(
-		summary = "회원의 전체 여행일지 조회",
+		summary = "회원의 전체 여행일지 조회 (앱용)",
 		description = "특정 회원의 전체 여행일지 리스트를 페이징하여 반환합니다.",
 		security = @SecurityRequirement(name = "bearer-key")
 	)
@@ -70,6 +71,20 @@ public class JournalController {
 		@ParameterObject @PageableDefault Pageable pageable) {
 		Long currentMemberId = SecurityUtil.getCurrentMemberId();
 		return ApiResponseHandler.getObjectSuccess(journalService.findAllJournalsByMemberId(memberId, currentMemberId, pageable));
+	}
+
+	@Operation(
+		summary = "회원의 전체 여행일지 조회 (웹용)",
+		description = "웹에서 사용할 특정 회원의 전체 여행일지 리스트를 페이징하여 반환합니다. 썸네일, 좋아요/댓글 수 포함",
+		security = @SecurityRequirement(name = "bearer-key")
+	)
+	@GetMapping("/web/members/{memberId}/journals")
+	public ResponseEntity<Page<JournalListWebResponse>> findJournalsByMemberForWeb(
+		@Parameter(description = "조회할 member_id")
+		@PathVariable Long memberId,
+		@ParameterObject @PageableDefault Pageable pageable) {
+		Long currentMemberId = SecurityUtil.getCurrentMemberId();
+		return ApiResponseHandler.getObjectSuccess(journalService.findJournalsByMemberForWeb(memberId, currentMemberId, pageable));
 	}
 
 	@PostMapping(value = "/members/journal/create")

@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.block.service.BlockService;
 import com.traveljournal.domain.explore.dto.ExploreJournalFeedResponse;
 import com.traveljournal.domain.explore.entity.ExploreSeenJournal;
@@ -34,6 +35,7 @@ public class ExploreFeedService {
 	private final JournalRepository journalRepository;
 	private final ExploreSeenJournalRepository exploreSeenJournalRepository;
 	private final BlockService blockService;
+	private final ImageService imageService;
 
 	@Transactional(readOnly = true)
 	public Page<ExploreJournalFeedResponse> getExploreFeed(Long memberId, Pageable pageable) {
@@ -84,7 +86,7 @@ public class ExploreFeedService {
 		List<ExploreJournalFeedResponse> content = journalIdPage.getContent().stream()
 			.map(journalMap::get)
 			.filter(Objects::nonNull)
-			.map(j -> ExploreJournalFeedResponse.of(j, j.getMember()))
+			.map(j -> ExploreJournalFeedResponse.of(j, j.getMember(), imageService))
 			.toList();
 
 		return new PageImpl<>(content, pageable, journalIdPage.getTotalElements());
@@ -132,7 +134,7 @@ public class ExploreFeedService {
 		Collections.shuffle(orderedJournals);
 
 		List<ExploreJournalFeedResponse> content = orderedJournals.stream()
-			.map(j -> ExploreJournalFeedResponse.of(j, j.getMember()))
+			.map(j -> ExploreJournalFeedResponse.of(j, j.getMember(), imageService))
 			.toList();
 
 		long totalElements = getTotalElementsCount(excludeMemberIds, seenJournalIds, hasSeenJournals);

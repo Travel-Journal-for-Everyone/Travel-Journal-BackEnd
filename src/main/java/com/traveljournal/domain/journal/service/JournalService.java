@@ -27,6 +27,7 @@ import com.traveljournal.domain.journal.dto.JournalDayRequest;
 import com.traveljournal.domain.journal.dto.JournalDaySpotRequest;
 import com.traveljournal.domain.journal.dto.JournalDetailResponse;
 import com.traveljournal.domain.journal.dto.JournalListResponse;
+import com.traveljournal.domain.journal.dto.JournalListWebResponse;
 import com.traveljournal.domain.journal.entity.Journal;
 import com.traveljournal.domain.journal.entity.JournalDay;
 import com.traveljournal.domain.journal.entity.JournalDaySpot;
@@ -214,22 +215,24 @@ public class JournalService {
 	}
 
 	private void setThumbnailUrl(Journal journal, List<JournalDay> journalDays, String thumbnailUploadId) {
-		String thumbnailUrl = null;
-		if(thumbnailUploadId != null) {
-			boolean isValidThumbnail = journalDays.stream()
+		Photo thumbnailPhoto = null;
+
+		if (thumbnailUploadId != null) {
+			// 지정된 썸네일 찾기
+			thumbnailPhoto = journalDays.stream()
 				.flatMap(day -> day.getPhotos().stream())
-				.anyMatch(photo -> photo.getImageInfo().getFilename().equals(thumbnailUploadId));
-
-			if (isValidThumbnail) {
-				thumbnailUrl = imageService.getImageUrl(thumbnailUploadId);
-			}
+				.filter(photo -> thumbnailUploadId.equals(photo.getImageInfo().getFilename()))
+				.findFirst()
+				.orElse(null);
 		}
 
-		if (thumbnailUrl == null && !journalDays.isEmpty() && !journalDays.get(0).getPhotos().isEmpty()) {
-			Photo firstPhoto = journalDays.get(0).getPhotos().get(0);
-			thumbnailUrl = imageService.getImageUrl(firstPhoto.getImageInfo().getFilename());
+		if (thumbnailPhoto == null && !journalDays.isEmpty() && !journalDays.get(0).getPhotos().isEmpty()) {
+			thumbnailPhoto = journalDays.get(0).getPhotos().get(0);
 		}
-		journal.updateThumbnailUrl(thumbnailUrl);
+
+		if (thumbnailPhoto != null) {
+			journal.setThumbnail(thumbnailPhoto);
+		}
 	}
 
 	@Transactional(readOnly = true)
@@ -261,5 +264,34 @@ public class JournalService {
 
 	private void validateAccess(Long viewerId, Long memberId) {
 		blockService.validateNotBlocked(viewerId, memberId);
+	}
+
+	@Transactional(readOnly = true)
+	public Page<JournalListWebResponse> findJournalsByMemberForWeb(Long memberId, Long viewerId, Pageable pageable) {
+		validateAccess(viewerId, memberId);
+
+		List<Long> blockedIds = blockService.getBlockedMemberIds(viewerId);
+		Page<Long> journalIdPage = journalRepository.findIdsByMemberIdExcludingBlocked(memberId, blockedIds, pageable);
+
+		return getJournalListWebResponses(pageable, journalIdPage);
+	}
+
+	private Page<JournalListWebResponse> getJournalListWebResponses(Pageable pageable, Page<Long> journalIdPage) {
+		List<Long> journalIds = journalIdPage.getContent();
+
+		List<Journal> journals = journalRepository.findAllByIdInFetchJoin(journalIds);
+		Map<Long, Journal> journalMap = journals.stream().collect(Collectors.toMap(Journal::getId, j -> j));
+		List<Journal> sortedJournals = journalIds.stream().map(journalMap::get).toList();
+
+		return new PageImpl<>(
+			sortedJournals.stream()
+				.map(journal -> JournalListWebResponse.of(
+					journal,
+					imageService
+				))
+				.toList(),
+			pageable,
+			journalIdPage.getTotalElements()
+		);
 	}
 }

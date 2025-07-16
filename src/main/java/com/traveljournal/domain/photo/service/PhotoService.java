@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -128,6 +129,18 @@ public class PhotoService {
 	@Transactional
 	public void deletePhotoByUploadId(String uploadId) {
 		ImageInfo imageInfo = imageInfoService.getImageInfo(uploadId);
+
+		Optional<Photo> photoToDelete = photoRepository.findByImageInfo(imageInfo);
+		if (photoToDelete.isPresent()) {
+			Photo photo = photoToDelete.get();
+
+			if (photo.getJournalDay() != null) {
+				photo.getJournalDay().removePhoto(photo);
+			}
+
+			photoRepository.delete(photo);
+		}
+
 		imageService.deleteImageFromS3(imageInfo.getUploadId());
 		imageInfoService.deleteImageInfo(imageInfo);
 	}

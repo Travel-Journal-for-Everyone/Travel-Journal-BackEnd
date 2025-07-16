@@ -78,7 +78,8 @@ public class Journal {
 	private List<HashTag> hashTags = new ArrayList<>();
 
 	@OneToMany(mappedBy = "journal",
-		cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+		cascade = CascadeType.ALL,
+		orphanRemoval = true,
 		fetch = FetchType.LAZY)
 	@Builder.Default
 	@BatchSize(size = 10)

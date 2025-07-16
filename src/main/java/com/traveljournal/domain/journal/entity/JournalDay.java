@@ -51,7 +51,8 @@ public class JournalDay {
 	private Journal journal;
 
 	@OneToMany(mappedBy = "journalDay",
-		cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+		cascade = CascadeType.ALL,
+		orphanRemoval = true,
 		fetch = FetchType.LAZY)
 	@OrderBy("photoOrder ASC")
 	@Builder.Default
@@ -59,7 +60,8 @@ public class JournalDay {
 	private List<Photo> photos = new ArrayList<>();
 
 	@OneToMany(mappedBy = "journalDay",
-		cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+		cascade = CascadeType.ALL,
+		orphanRemoval = true,
 		fetch = FetchType.LAZY)
 	@OrderBy("spotOrder ASC")
 	@Builder.Default

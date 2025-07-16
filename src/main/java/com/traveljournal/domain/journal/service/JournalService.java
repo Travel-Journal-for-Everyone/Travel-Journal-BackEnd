@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,7 @@ import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.member.service.MemberService;
 import com.traveljournal.domain.photo.dto.PhotoListResponse;
 import com.traveljournal.domain.photo.dto.PhotoMetadataRequest;
+import com.traveljournal.domain.photo.entity.Photo;
 import com.traveljournal.domain.photo.service.PhotoService;
 import com.traveljournal.domain.statistics.service.MemberRegionStatisticsService;
 import com.traveljournal.domain.statistics.service.MemberStatisticsService;
@@ -241,7 +244,6 @@ public class JournalService {
 		);
 	}
 
-
 	@Transactional
 	public void deleteJournal(Long journalId, Long memberId) {
 		Journal journal = journalRepository.findBasicInfoById(journalId)
@@ -294,6 +296,8 @@ public class JournalService {
 		List<JournalDay> updatedDays = createJournalDays(request.journalDays(), journal);
 		journal.updateDaysDetail(updatedDays);
 
+		journalRepository.save(journal);
+
 		photoService.processJournalPhotos(updatedDays, request.photoMetadataList());
 		photoService.setJournalThumbnail(journal, updatedDays, request.thumbnailUploadId());
 
@@ -326,15 +330,16 @@ public class JournalService {
 	private Set<String> calculatePhotosToDelete(Journal journal, JournalUpdateRequest request) {
 		Set<String> existingPhotoUploadIds = journal.getDaysDetail().stream()
 			.flatMap(day -> day.getPhotos().stream())
-			.filter(photo -> photo.getImageInfo() != null)
-			.map(photo -> photo.getImageInfo().getUploadId())
+			.filter(Photo::hasImageInfo)
+			.map(Photo::getUploadIdSafely)
+			.filter(Objects::nonNull)
 			.collect(Collectors.toSet());
 
-		Set<String> newPhotoUploadIds = request.photoMetadataList() != null ?
-			request.photoMetadataList().stream()
-				.map(PhotoMetadataRequest::uploadId)
-				.collect(Collectors.toSet()) :
-			Collections.emptySet();
+		Set<String> newPhotoUploadIds = Optional.ofNullable(request.photoMetadataList())
+			.orElse(Collections.emptyList())
+			.stream()
+			.map(PhotoMetadataRequest::uploadId)
+			.collect(Collectors.toSet());
 
 		return existingPhotoUploadIds.stream()
 			.filter(uploadId -> !newPhotoUploadIds.contains(uploadId))

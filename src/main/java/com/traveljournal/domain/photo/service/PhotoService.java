@@ -2,6 +2,7 @@ package com.traveljournal.domain.photo.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -80,10 +81,100 @@ public class PhotoService {
 
 		Map<String, Photo> existingPhotoMap = photoRepository.findByImageInfoUploadIdInAsMap(uploadIds);
 
+		validateImageExistence(uploadIds, imageInfoMap);
+
+		processPhotosWithBatch(journalDays, photoMetadataList, imageInfoMap, existingPhotoMap);
+	}
+
+	private void validateImageExistence(Set<String> uploadIds, Map<String, ImageInfo> imageInfoMap) {
+		Set<String> missingImages = uploadIds.stream()
+			.filter(uploadId -> !imageInfoMap.containsKey(uploadId))
+			.collect(Collectors.toSet());
+
+		if (!missingImages.isEmpty()) {
+			throw new ImageNotFoundException("업로드되지 않은 이미지가 있습니다: " + missingImages);
+		}
+	}
+
+	private void processPhotosWithBatch(List<JournalDay> journalDays,
+		List<PhotoMetadataRequest> photoMetadataList,
+		Map<String, ImageInfo> imageInfoMap,
+		Map<String, Photo> existingPhotoMap) {
+
+		Set<String> processedUploadIds = new HashSet<>();
 		int globalPhotoOrder = 1;
+
 		for (JournalDay day : journalDays) {
-			globalPhotoOrder = addPhotosToDay(day, photoMetadataList, globalPhotoOrder,
-				imageInfoMap, existingPhotoMap);
+			globalPhotoOrder = processDayPhotos(day, photoMetadataList, imageInfoMap,
+				existingPhotoMap, processedUploadIds, globalPhotoOrder);
+		}
+	}
+
+	private int processDayPhotos(JournalDay day, List<PhotoMetadataRequest> photoMetadataList,
+		Map<String, ImageInfo> imageInfoMap, Map<String, Photo> existingPhotoMap,
+		Set<String> processedUploadIds, int globalPhotoOrder) {
+
+		int dayNum = day.getDayNumber();
+		int daySpotOrder = 1;
+
+		for (PhotoMetadataRequest meta : photoMetadataList) {
+			if (meta.dayNumber() != dayNum) continue;
+			if (!processedUploadIds.add(meta.uploadId())) continue;
+
+			Photo photo = getOrCreatePhoto(meta, imageInfoMap, existingPhotoMap,
+				globalPhotoOrder++, daySpotOrder++);
+			assignPhotoToDay(photo, day);
+		}
+
+		return globalPhotoOrder;
+	}
+
+	private Photo getOrCreatePhoto(PhotoMetadataRequest meta, Map<String, ImageInfo> imageInfoMap,
+		Map<String, Photo> existingPhotoMap, int photoOrder, int daySpotOrder) {
+
+		ImageInfo imageInfo = imageInfoMap.get(meta.uploadId());
+		Photo existingPhoto = existingPhotoMap.get(meta.uploadId());
+
+		if (existingPhoto != null) {
+			// 기존 사진 재사용 - 메타데이터 업데이트
+			updatePhotoMetadata(existingPhoto, meta, photoOrder, daySpotOrder);
+			log.debug("기존 사진 재사용: uploadId={}", meta.uploadId());
+			return existingPhoto;
+		} else {
+			// 새 사진 생성
+			Photo newPhoto = createNewPhoto(meta, imageInfo, photoOrder, daySpotOrder);
+			log.debug("새 사진 생성: uploadId={}", meta.uploadId());
+			return newPhoto;
+		}
+	}
+
+	private void updatePhotoMetadata(Photo photo, PhotoMetadataRequest meta, int photoOrder, int daySpotOrder) {
+		photo.updatePhotoMetadata(photoOrder, daySpotOrder, meta.description(),
+			meta.address(), meta.latitude(), meta.longitude(),
+			meta.getParsedTakenDateTime());
+	}
+
+	private Photo createNewPhoto(PhotoMetadataRequest meta, ImageInfo imageInfo, int photoOrder, int daySpotOrder) {
+		return Photo.builder()
+			.description(meta.description())
+			.address(meta.address())
+			.takenDateTime(meta.getParsedTakenDateTime())
+			.latitude(meta.latitude())
+			.longitude(meta.longitude())
+			.imageInfo(imageInfo)
+			.photoOrder(photoOrder)
+			.daySpotOrder(daySpotOrder)
+			.isThumbnail(false)
+			.build();
+	}
+
+	private void assignPhotoToDay(Photo photo, JournalDay targetDay) {
+		if (photo.getJournalDay() != null && !photo.getJournalDay().equals(targetDay)) {
+			photo.getJournalDay().removePhoto(photo);
+		}
+
+		if (photo.getJournalDay() == null || !photo.getJournalDay().equals(targetDay)) {
+			targetDay.addPhoto(photo);
 		}
 	}
 

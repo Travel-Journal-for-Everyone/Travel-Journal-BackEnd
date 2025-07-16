@@ -106,23 +106,35 @@ public class Photo {
 		this.journalDay = null;
 	}
 
-	public void updatePhotoMetadata(int photoOrder, int daySpotOrder,
-		String description, String address,
-		Double latitude, Double longitude,
+	public void updatePhotoMetadata(int photoOrder, int daySpotOrder, String description,
+		String address, Double latitude, Double longitude,
 		LocalDateTime takenDateTime) {
-		if (photoOrder < 1) {
-			throw new BadRequestException("사진 순서는 1 이상이어야 합니다.");
-		}
-		if (daySpotOrder < 1) {
-			throw new BadRequestException("장소 순서는 1 이상이어야 합니다.");
-		}
+		validateOrder(photoOrder, daySpotOrder);
 
 		this.photoOrder = photoOrder;
 		this.daySpotOrder = daySpotOrder;
-		this.description = description != null ? description.trim() : this.description;
-		this.address = address != null ? address.trim() : this.address;
-		this.latitude = latitude != null ? latitude : this.latitude;
-		this.longitude = longitude != null ? longitude : this.longitude;
-		this.takenDateTime = takenDateTime != null ? takenDateTime : this.takenDateTime;
+		this.description = description;
+		this.address = address;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.takenDateTime = takenDateTime;
+	}
+
+	private void validateOrder(int photoOrder, int daySpotOrder) {
+		if (photoOrder < 1 || daySpotOrder < 1) {
+			throw new BadRequestException("사진 순서는 1 이상이어야 합니다.");
+		}
+	}
+
+	public int getDayNumber() {
+		return journalDay != null ? journalDay.getDayNumber() : 0;
+	}
+
+	public boolean hasImageInfo() {
+		return imageInfo != null;
+	}
+
+	public String getUploadIdSafely() {
+		return hasImageInfo() ? imageInfo.getUploadId() : null;
 	}
 }

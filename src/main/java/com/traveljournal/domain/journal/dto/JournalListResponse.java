@@ -23,7 +23,9 @@ public record JournalListResponse(
 	@Schema(example = "2025.03.15")
 	String startDate,
 	@Schema(example = "2025.03.18")
-	String endDate
+	String endDate,
+	@Schema(example = "https://travel-journal-s3.s3.amazonaws.com/source/test4.jpeg")
+	String thumbnailUrl
 ) {
 	public static JournalListResponse of(Journal journal) {
 		return JournalListResponse.builder()

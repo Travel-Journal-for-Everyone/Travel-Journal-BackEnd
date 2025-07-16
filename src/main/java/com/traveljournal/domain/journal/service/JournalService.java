@@ -26,7 +26,6 @@ import com.traveljournal.domain.journal.dto.JournalDayRequest;
 import com.traveljournal.domain.journal.dto.JournalDaySpotRequest;
 import com.traveljournal.domain.journal.dto.JournalDetailResponse;
 import com.traveljournal.domain.journal.dto.JournalListResponse;
-import com.traveljournal.domain.journal.dto.JournalListWebResponse;
 import com.traveljournal.domain.journal.dto.JournalUpdateRequest;
 import com.traveljournal.domain.journal.entity.Journal;
 import com.traveljournal.domain.journal.entity.JournalDay;
@@ -100,7 +99,8 @@ public class JournalService {
 					journal.getNights(),
 					journal.getDays(),
 					journal.getStartDate(),
-					journal.getEndDate()
+					journal.getEndDate(),
+					journal.getThumbnailUrl(imageService)
 				))
 				.toList(),
 			pageable,
@@ -213,35 +213,6 @@ public class JournalService {
 
 	private void validateAccess(Long viewerId, Long memberId) {
 		blockService.validateNotBlocked(viewerId, memberId);
-	}
-
-	@Transactional(readOnly = true)
-	public Page<JournalListWebResponse> findJournalsByMemberForWeb(Long memberId, Long viewerId, Pageable pageable) {
-		validateAccess(viewerId, memberId);
-
-		List<Long> blockedIds = blockService.getBlockedMemberIds(viewerId);
-		Page<Long> journalIdPage = journalRepository.findIdsByMemberIdExcludingBlocked(memberId, blockedIds, pageable);
-
-		return getJournalListWebResponses(pageable, journalIdPage);
-	}
-
-	private Page<JournalListWebResponse> getJournalListWebResponses(Pageable pageable, Page<Long> journalIdPage) {
-		List<Long> journalIds = journalIdPage.getContent();
-
-		List<Journal> journals = journalRepository.findAllByIdInFetchJoin(journalIds);
-		Map<Long, Journal> journalMap = journals.stream().collect(Collectors.toMap(Journal::getId, j -> j));
-		List<Journal> sortedJournals = journalIds.stream().map(journalMap::get).toList();
-
-		return new PageImpl<>(
-			sortedJournals.stream()
-				.map(journal -> JournalListWebResponse.of(
-					journal,
-					imageService
-				))
-				.toList(),
-			pageable,
-			journalIdPage.getTotalElements()
-		);
 	}
 
 	@Transactional

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.block.repository.BlockRepository;
 import com.traveljournal.domain.hashtag.entity.HashTag;
 import com.traveljournal.domain.journal.dto.JournalListResponse;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class JournalSearchService {
 	private final JournalRepository journalRepository;
 	private final BlockRepository blockRepository;
+	private final ImageService imageService;
 
 	@Transactional(readOnly = true)
 	public Page<JournalListResponse> searchJournals(String keyword, Pageable pageable) {
@@ -48,7 +50,8 @@ public class JournalSearchService {
 					journal.getNights(),
 					journal.getDays(),
 					journal.getStartDate(),
-					journal.getEndDate()
+					journal.getEndDate(),
+					journal.getThumbnailUrl(imageService)
 				))
 				.toList(),
 			pageable,
@@ -82,7 +85,8 @@ public class JournalSearchService {
 					journal.getNights(),
 					journal.getDays(),
 					journal.getStartDate(),
-					journal.getEndDate()
+					journal.getEndDate(),
+					journal.getThumbnailUrl(imageService)
 				))
 				.toList(),
 			pageable,

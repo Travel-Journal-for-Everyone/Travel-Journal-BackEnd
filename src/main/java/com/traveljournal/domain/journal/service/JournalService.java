@@ -267,10 +267,10 @@ public class JournalService {
 		List<JournalDay> updatedDays = createJournalDays(request.journalDays(), journal);
 		journal.updateDaysDetail(updatedDays);
 
-		journalRepository.save(journal);
-
 		photoService.processJournalPhotos(updatedDays, request.photoMetadataList());
 		photoService.setJournalThumbnail(journal, updatedDays, request.thumbnailUploadId());
+
+		journalRepository.save(journal);
 
 		if (!photosToDelete.isEmpty()) {
 			photoService.deletePhotosByUploadIds(photosToDelete);

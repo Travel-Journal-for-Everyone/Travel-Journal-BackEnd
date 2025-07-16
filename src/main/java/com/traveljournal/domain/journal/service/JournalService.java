@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.traveljournal.domain.Image.service.ImageService;
 import com.traveljournal.domain.block.dto.BlockRelationType;
 import com.traveljournal.domain.block.service.BlockService;
+import com.traveljournal.domain.explore.repository.ExploreSeenJournalRepository;
 import com.traveljournal.domain.hashtag.entity.HashTag;
 import com.traveljournal.domain.hashtag.service.HashTagService;
 import com.traveljournal.domain.journal.dto.JournalCreateRequest;
@@ -52,6 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JournalService {
 
 	private final JournalRepository journalRepository;
+	private final ExploreSeenJournalRepository exploreSeenJournalRepository;
 	private final HashTagService hashTagService;
 	private final MemberRegionStatisticsService memberRegionStatisticsService;
 	private final ImageService imageService;
@@ -221,6 +223,8 @@ public class JournalService {
 			.orElseThrow(() -> new JournalNotFoundException("해당하는 여행일지가 없습니다."));
 
 		validateJournalOwnership(journal, memberId);
+
+		exploreSeenJournalRepository.deleteByJournalId(journalId);
 
 		memberStatisticsService.decreaseTravelDiaryCount(memberId);
 		memberRegionStatisticsService.decreaseTravelDiaryCount(memberId, journal.getRegion());

@@ -21,4 +21,8 @@ public interface ExploreSeenJournalRepository extends JpaRepository<ExploreSeenJ
 	@Modifying
 	@Query("DELETE FROM ExploreSeenJournal esj WHERE esj.seenAt < :cutoff")
 	void deleteAllBySeenAtBefore(@Param("cutoff") LocalDateTime cutoff);
+
+	@Modifying
+	@Query("DELETE FROM ExploreSeenJournal esj WHERE esj.journal.id = :journalId")
+	void deleteByJournalId(@Param("journalId") Long journalId);
 }

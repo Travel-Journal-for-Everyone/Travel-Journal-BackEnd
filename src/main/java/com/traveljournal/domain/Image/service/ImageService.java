@@ -10,16 +10,20 @@ import org.springframework.web.multipart.MultipartFile;
 import com.traveljournal.domain.Image.entity.ImageInfo;
 import com.traveljournal.domain.Image.repository.ImageInfoRepository;
 import com.traveljournal.domain.Image.util.FilenameUtil;
+import com.traveljournal.global.exception.ImageDeleteException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ImageService {
 	private final S3Client s3Client;
 	private final ImageInfoRepository imageInfoRepository;
@@ -49,18 +53,18 @@ public class ImageService {
 		// 파일명 생성
 		String originalFilename = imageFile.getOriginalFilename();
 		String extension = FilenameUtil.getExtension(originalFilename);
-		String fileName = FilenameUtil.generateUniqueFileName("profile", memberId, extension);
+		String uploadId = FilenameUtil.generateUniqueFileName("profile", memberId, extension);
 
 		// 원본 이미지 저장
 		byte[] originalImageBytes = imageFile.getBytes();
-		String originalImagePath = uploadToS3(originalImageBytes, fileName, extension, false);
+		String originalImagePath = uploadToS3(originalImageBytes, uploadId, extension, false);
 
 		// // 리사이즈된 이미지 생성 및 저장
 		// byte[] resizedImageBytes = resizeImage(imageFile);
 		// uploadToS3(resizedImageBytes, fileName, extension, true);
 
 		// 이미지 정보 저장
-		saveImageInfo(fileName, originalFilename);
+		saveImageInfo(uploadId, originalFilename);
 
 		// 원본 이미지 경로 반환
 		return originalImagePath;
@@ -69,13 +73,13 @@ public class ImageService {
 	/**
 	 * 이미지 정보를 데이터베이스에 저장
 	 */
-	public ImageInfo saveImageInfo(String filename, String uploadFilename) {
+	public void saveImageInfo(String uploadId, String uploadFilename) {
 		ImageInfo imageInfo = ImageInfo.builder()
-			.filename(filename)
+			.uploadId(uploadId)
 			.uploadFilename(uploadFilename)
 			.build();
 
-		return imageInfoRepository.save(imageInfo);
+		imageInfoRepository.save(imageInfo);
 	}
 
 	/**
@@ -95,15 +99,15 @@ public class ImageService {
 	/**
 	 * S3에 이미지 업로드 (SDK V2 방식)
 	 * @param imageBytes 업로드할 이미지 바이트 배열
-	 * @param fileName 파일 이름
+	 * @param uploadId 파일 이름
 	 * @param extension 파일 확장자
 	 * @param isResized 리사이즈된 이미지인지 여부
 	 * @return 업로드된 이미지의 URL
 	 */
-	public String uploadToS3(byte[] imageBytes, String fileName, String extension, boolean isResized) {
+	public String uploadToS3(byte[] imageBytes, String uploadId, String extension, boolean isResized) {
 		// 리사이즈된 이미지는 resizedPath에, 원본 이미지는 uploadPath에 저장
 		String path = isResized ? resizedPath : uploadPath;
-		String key = path + "/" + fileName;
+		String key = path + "/" + uploadId;
 
 		try {
 			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -131,5 +135,37 @@ public class ImageService {
 	public String getImageUrl(String filename) {
 		String key = uploadPath + "/" + filename;
 		return String.format("https://%s.s3.amazonaws.com/%s", bucketName, key);
+	}
+
+	public void deleteImageFromS3(String uploadId) {
+		try {
+			// S3에서 원본 파일 삭제
+			deleteS3Object(uploadPath + "/" + uploadId);
+
+			// 썸네일이 있다면 썸네일도 삭제
+			try {
+				deleteS3Object(resizedPath + "/" + uploadId);
+			} catch (Exception e) {
+				log.warn("썸네일 삭제 실패 (무시): {}", uploadId);
+			}
+
+			log.info("S3 파일 삭제 완료: {}", uploadId);
+		} catch (Exception e) {
+			log.error("S3 파일 삭제 실패: {}", uploadId, e);
+			throw new ImageDeleteException("S3 파일 삭제에 실패했습니다: " + uploadId);
+		}
+	}
+
+	private void deleteS3Object(String key) {
+		try {
+			DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+				.bucket(bucketName)
+				.key(key)
+				.build();
+
+			s3Client.deleteObject(deleteObjectRequest);
+		} catch (S3Exception e) {
+			throw new RuntimeException("S3 객체 삭제 실패: " + e.awsErrorDetails().errorMessage(), e);
+		}
 	}
 }

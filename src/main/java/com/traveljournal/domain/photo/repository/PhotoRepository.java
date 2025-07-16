@@ -1,10 +1,26 @@
 package com.traveljournal.domain.photo.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import com.traveljournal.domain.Image.entity.ImageInfo;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import com.traveljournal.domain.photo.entity.Photo;
 
 public interface PhotoRepository extends JpaRepository<Photo, Long> {
-	boolean existsByImageInfo(ImageInfo imageInfo);
+
+	@Query("SELECT p FROM Photo p WHERE p.imageInfo.uploadId IN :uploadIds")
+	List<Photo> findByImageInfoUploadIdIn(@Param("uploadIds") Set<String> uploadIds);
+
+	default Map<String, Photo> findByImageInfoUploadIdInAsMap(Set<String> uploadIds) {
+		return findByImageInfoUploadIdIn(uploadIds).stream()
+			.collect(Collectors.toMap(
+				photo -> photo.getImageInfo().getUploadId(),
+				photo -> photo
+			));
+	}
 }

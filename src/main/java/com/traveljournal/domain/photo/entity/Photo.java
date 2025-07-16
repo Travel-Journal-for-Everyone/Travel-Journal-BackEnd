@@ -2,8 +2,12 @@ package com.traveljournal.domain.photo.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.traveljournal.domain.Image.entity.ImageInfo;
 import com.traveljournal.domain.journal.entity.JournalDay;
+import com.traveljournal.global.exception.BadRequestException;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -57,10 +61,13 @@ public class Photo {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "journal_day_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private JournalDay journalDay;
 
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToOne(fetch = FetchType.LAZY,
+		cascade = {CascadeType.PERSIST, CascadeType.MERGE})
 	@JoinColumn(name = "image_info_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private ImageInfo imageInfo;
 
 	@Builder
@@ -86,6 +93,36 @@ public class Photo {
 	}
 
 	public void assignJournalDay(JournalDay journalDay) {
+		if (journalDay == null) {
+			throw new BadRequestException("여행일차는 null일 수 없습니다.");
+		}
+		if (this.journalDay != null && !this.journalDay.equals(journalDay)) {
+			throw new BadRequestException("이미 다른 여행일차에 할당된 사진입니다.");
+		}
 		this.journalDay = journalDay;
+	}
+
+	public void removeFromJournalDay() {
+		this.journalDay = null;
+	}
+
+	public void updatePhotoMetadata(int photoOrder, int daySpotOrder,
+		String description, String address,
+		Double latitude, Double longitude,
+		LocalDateTime takenDateTime) {
+		if (photoOrder < 1) {
+			throw new BadRequestException("사진 순서는 1 이상이어야 합니다.");
+		}
+		if (daySpotOrder < 1) {
+			throw new BadRequestException("장소 순서는 1 이상이어야 합니다.");
+		}
+
+		this.photoOrder = photoOrder;
+		this.daySpotOrder = daySpotOrder;
+		this.description = description != null ? description.trim() : this.description;
+		this.address = address != null ? address.trim() : this.address;
+		this.latitude = latitude != null ? latitude : this.latitude;
+		this.longitude = longitude != null ? longitude : this.longitude;
+		this.takenDateTime = takenDateTime != null ? takenDateTime : this.takenDateTime;
 	}
 }

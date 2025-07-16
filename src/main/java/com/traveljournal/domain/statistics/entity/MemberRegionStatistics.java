@@ -32,4 +32,9 @@ public class MemberRegionStatistics {
 		this.placesCount++;
 	}
 
+	public void decreaseTravelDiaryCount() {
+		if (this.travelDiaryCount > 0) {
+			this.travelDiaryCount--;
+		}
+	}
 }

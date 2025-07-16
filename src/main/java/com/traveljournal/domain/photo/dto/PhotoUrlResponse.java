@@ -18,7 +18,7 @@ public record PhotoUrlResponse(
 ) {
 	public static PhotoUrlResponse from(Photo photo, String photoUrl) {
 		return new PhotoUrlResponse(
-			photo.getImageInfo().getFilename(),
+			photo.getImageInfo().getUploadId(),
 			photoUrl,
 			photo.getPhotoOrder(),
 			photo.getDaySpotOrder(),

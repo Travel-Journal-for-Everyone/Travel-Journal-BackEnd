@@ -13,6 +13,8 @@ import com.traveljournal.domain.hashtag.entity.HashTag;
 import com.traveljournal.domain.member.entity.Member;
 import com.traveljournal.domain.photo.dto.PhotoListResponse;
 import com.traveljournal.domain.photo.entity.Photo;
+import com.traveljournal.global.exception.BadRequestException;
+import com.traveljournal.global.exception.UnauthorizedException;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -65,7 +67,7 @@ public class Journal {
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member member;
 
-	@ManyToMany
+	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
 	@JoinTable(
 		name = "journal_hashtag",
 		joinColumns = @JoinColumn(name = "journal_id"),
@@ -75,7 +77,9 @@ public class Journal {
 	@BatchSize(size = 10)
 	private List<HashTag> hashTags = new ArrayList<>();
 
-	@OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "journal",
+		cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+		fetch = FetchType.LAZY)
 	@Builder.Default
 	@BatchSize(size = 10)
 	private List<JournalDay> daysDetail = new ArrayList<>();
@@ -91,7 +95,7 @@ public class Journal {
 	}
 
 	public void addDay(JournalDay day) {
-		this.daysDetail.add(day);
+		addDayInternal(day);
 	}
 
 	public List<PhotoListResponse> getPhotosAsResponse(ImageService imageService) {
@@ -99,13 +103,8 @@ public class Journal {
 			.flatMap(day -> day.getPhotos().stream())
 			.sorted(Comparator.comparing(Photo::getPhotoOrder))
 			.map(photo -> PhotoListResponse.from(photo,
-				imageService.getImageUrl(photo.getImageInfo().getFilename())))
+				imageService.getImageUrl(photo.getImageInfo().getUploadId())))
 			.toList();
-	}
-
-	public boolean hasPhotos() {
-		return this.daysDetail.stream()
-			.anyMatch(day -> !day.getPhotos().isEmpty());
 	}
 
 	public List<PhotoListResponse> getDayPhotosAsResponse(Integer dayNumber, ImageService imageService) {
@@ -114,8 +113,97 @@ public class Journal {
 			.flatMap(day -> day.getPhotos().stream())
 			.sorted(Comparator.comparing(Photo::getDaySpotOrder))
 			.map(photo -> PhotoListResponse.from(photo,
-				imageService.getImageUrl(photo.getImageInfo().getFilename())))
+				imageService.getImageUrl(photo.getImageInfo().getUploadId())))
 			.toList();
+	}
+
+	public void validateOwnership(Long memberId) {
+		if (memberId == null) {
+			throw new IllegalArgumentException("회원 ID는 null일 수 없습니다.");
+		}
+		if (this.member == null || !Objects.equals(this.member.getId(), memberId)) {
+			throw new UnauthorizedException("해당 여행일지를 수정할 권한이 없습니다.");
+		}
+	}
+
+	private void addDayInternal(JournalDay day) {
+		if (day == null) {
+			throw new IllegalArgumentException("여행일차는 null일 수 없습니다.");
+		}
+		this.daysDetail.add(day);
+		day.assignToJournal(this);
+	}
+
+	private void removeDayInternal(JournalDay day) {
+		if (day != null) {
+			this.daysDetail.remove(day);
+			day.removeFromJournal();
+		}
+	}
+
+	public void updateDaysDetail(List<JournalDay> newDays) {
+		new ArrayList<>(this.daysDetail).forEach(this::removeDayInternal);
+
+		if (newDays != null && !newDays.isEmpty()) {
+			validateDayNumbers(newDays);
+			newDays.forEach(this::addDayInternal);
+		}
+	}
+
+	private void validateDayNumbers(List<JournalDay> days) {
+		if (days.size() != this.days.intValue()) {
+			throw new BadRequestException("일차 수가 여행 기간과 일치하지 않습니다.");
+		}
+
+		long distinctDayNumbers = days.stream()
+			.mapToInt(JournalDay::getDayNumber)
+			.distinct()
+			.count();
+
+		if (distinctDayNumbers != days.size()) {
+			throw new BadRequestException("중복된 일차 번호가 있습니다.");
+		}
+	}
+
+	public void updateJournalInfo(String title, String region, Long nights, Long days,
+		String startDate, String endDate, String description) {
+		validateJournalInfoInput(title, region, nights, days);
+
+		this.title = title.trim();
+		this.region = region.trim();
+		this.nights = nights;
+		this.days = days;
+		this.startDate = startDate != null ? startDate.trim() : this.startDate;
+		this.endDate = endDate != null ? endDate.trim() : this.endDate;
+		this.description = description != null ? description.trim() : this.description;
+	}
+
+	private void validateJournalInfoInput(String title, String region, Long nights, Long days) {
+		if (title == null || title.trim().isEmpty()) {
+			throw new BadRequestException("제목은 필수입니다.");
+		}
+		if (region == null || region.trim().isEmpty()) {
+			throw new BadRequestException("지역은 필수입니다.");
+		}
+		if (nights == null || nights < 0) {
+			throw new BadRequestException("박수는 0 이상이어야 합니다.");
+		}
+		if (days == null || days < 1) {
+			throw new BadRequestException("일수는 1 이상이어야 합니다.");
+		}
+		if (days != nights + 1) {
+			throw new BadRequestException("일수와 박수가 일치하지 않습니다. (일수 = 박수 + 1)");
+		}
+	}
+
+	public void updateHashTags(List<HashTag> newHashTags) {
+		this.hashTags.clear();
+		if (newHashTags != null && !newHashTags.isEmpty()) {
+			List<HashTag> distinctHashTags = newHashTags.stream()
+				.distinct()
+				.toList();
+			this.hashTags.addAll(distinctHashTags);
+		}
 	}
 
 	public Photo getThumbnailPhoto() {
@@ -129,7 +217,7 @@ public class Journal {
 	public String getThumbnailUrl(ImageService imageService) {
 		Photo thumbnailPhoto = getThumbnailPhoto();
 		if (thumbnailPhoto != null) {
-			return imageService.getImageUrl(thumbnailPhoto.getImageInfo().getFilename());
+			return imageService.getImageUrl(thumbnailPhoto.getImageInfo().getUploadId());
 		}
 		return null;
 	}

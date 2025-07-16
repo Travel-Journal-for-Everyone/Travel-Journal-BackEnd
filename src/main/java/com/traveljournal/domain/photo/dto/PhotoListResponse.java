@@ -32,7 +32,7 @@ public record PhotoListResponse(
 		return new PhotoListResponse(
 			photo.getPhotoOrder(),
 			photo.getDaySpotOrder(),
-			photo.getImageInfo().getFilename(),
+			photo.getImageInfo().getUploadId(),
 			photoUrl,
 			photo.getJournalDay().getDayNumber(),
 			photo.getDescription(),

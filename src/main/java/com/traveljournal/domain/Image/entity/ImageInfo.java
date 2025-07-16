@@ -25,14 +25,14 @@ public class ImageInfo {
 
 	@Column(nullable = false)
 	@Unique
-	private String filename;
+	private String uploadId;
 
 	@Column(nullable = false)
 	private String uploadFilename;
 
 	@Builder
-	public ImageInfo(String filename, String uploadFilename) {
-		this.filename = filename;
+	public ImageInfo(String uploadId, String uploadFilename) {
+		this.uploadId = uploadId;
 		this.uploadFilename = uploadFilename;
 	}
 }

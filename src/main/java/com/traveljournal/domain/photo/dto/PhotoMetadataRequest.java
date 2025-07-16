@@ -3,7 +3,9 @@ package com.traveljournal.domain.photo.dto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.traveljournal.domain.photo.entity.Photo;
+import com.traveljournal.global.exception.BadRequestException;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -29,7 +31,7 @@ public record PhotoMetadataRequest(
 
 	public static PhotoMetadataRequest from(Photo photo) {
 		return new PhotoMetadataRequest(
-			photo.getImageInfo().getFilename(),
+			photo.getImageInfo().getUploadId(),
 			photo.getJournalDay().getDayNumber(),
 			photo.getDescription(),
 			photo.getImageInfo().getUploadFilename(),
@@ -38,6 +40,18 @@ public record PhotoMetadataRequest(
 			photo.getLatitude(),
 			photo.getLongitude()
 		);
+	}
+
+	@JsonIgnore
+	public LocalDateTime getParsedTakenDateTime() {
+		if (takenDateTime == null || takenDateTime.trim().isEmpty()) {
+			return null;
+		}
+		try {
+			return LocalDateTime.parse(takenDateTime, DATE_TIME_FORMATTER);
+		} catch (Exception e) {
+			throw new BadRequestException("잘못된 날짜 형식입니다: " + takenDateTime);
+		}
 	}
 
 	private static String formatDateTime(LocalDateTime dateTime) {

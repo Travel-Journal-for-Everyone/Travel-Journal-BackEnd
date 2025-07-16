@@ -1,6 +1,7 @@
 package com.traveljournal.domain.journal.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -120,4 +121,16 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
 	@Query("SELECT COUNT(j) FROM Journal j WHERE j.member.id NOT IN :excludeMemberIds AND j.id NOT IN :seenIds")
 	long countAvailableJournalsForRandomFeedWithSeen(@Param("excludeMemberIds") List<Long> excludeMemberIds,
 		@Param("seenIds") List<Long> seenIds);
+
+	@Query("SELECT j FROM Journal j JOIN FETCH j.member WHERE j.id = :journalId")
+	Optional<Journal> findBasicInfoById(@Param("journalId") Long journalId);
+
+	@Modifying
+	@Query(value = """
+        DELETE ii FROM image_info ii
+        JOIN photo p ON p.image_info_id = ii.id
+        JOIN journal_day jd ON jd.id = p.journal_day_id
+        WHERE jd.journal_id = :journalId
+        """, nativeQuery = true)
+	void deleteImageInfoByJournalId(@Param("journalId") Long journalId);
 }

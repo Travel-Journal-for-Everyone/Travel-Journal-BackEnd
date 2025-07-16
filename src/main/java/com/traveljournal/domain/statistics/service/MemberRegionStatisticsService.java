@@ -27,4 +27,20 @@ public class MemberRegionStatisticsService {
 			));
 		regionStats.increaseTravelDiaryCount();
 	}
+
+	@Transactional
+	public void decreaseTravelDiaryCount(Long memberId, String rawRegion) {
+		String regionGroup = RegionNormalizer.normalize(rawRegion);
+		MemberRegionStatisticsId regionStatsId = new MemberRegionStatisticsId(memberId, regionGroup);
+
+		MemberRegionStatistics regionStats = memberRegionStatisticsRepository.findById(regionStatsId)
+			.orElse(null);
+
+		if (regionStats != null) {
+			regionStats.decreaseTravelDiaryCount();
+			if (regionStats.getTravelDiaryCount() <= 0) {
+				memberRegionStatisticsRepository.delete(regionStats);
+			}
+		}
+	}
 }

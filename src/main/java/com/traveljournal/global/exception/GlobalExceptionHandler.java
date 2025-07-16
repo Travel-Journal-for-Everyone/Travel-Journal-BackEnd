@@ -62,4 +62,14 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleJournalNotFound(JournalNotFoundException ex) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 	}
+
+	@ExceptionHandler(ImageDeleteException.class)
+	public ResponseEntity<String> handleImageDelete(ImageDeleteException ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(ImageNotFoundException.class)
+	public ResponseEntity<String> handleImageNotFound(ImageNotFoundException ex) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+	}
 }

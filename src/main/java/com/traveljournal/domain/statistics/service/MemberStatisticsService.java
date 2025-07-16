@@ -25,6 +25,12 @@ public class MemberStatisticsService {
 	}
 
 	@Transactional
+	public void decreaseTravelDiaryCount(Long memberId) {
+		MemberStatistics stats = findByMemberId(memberId);
+		stats.decreaseTravelDiaryCount();
+	}
+
+	@Transactional
 	public void increaseFollowerCount(Long memberId) {
 		MemberStatistics stats = findByMemberId(memberId);
 		stats.increaseFollowerCount();

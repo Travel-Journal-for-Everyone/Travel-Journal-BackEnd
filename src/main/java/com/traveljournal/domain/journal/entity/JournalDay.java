@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.traveljournal.domain.photo.entity.Photo;
+import com.traveljournal.global.exception.BadRequestException;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -44,22 +47,65 @@ public class JournalDay {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "journal_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Journal journal;
 
-	@OneToMany(mappedBy = "journalDay", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "journalDay",
+		cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+		fetch = FetchType.LAZY)
 	@OrderBy("photoOrder ASC")
 	@Builder.Default
 	@BatchSize(size = 10)
 	private List<Photo> photos = new ArrayList<>();
 
-	@OneToMany(mappedBy = "journalDay", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "journalDay",
+		cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+		fetch = FetchType.LAZY)
 	@OrderBy("spotOrder ASC")
 	@Builder.Default
 	@BatchSize(size = 10)
 	private List<JournalDaySpot> spots = new ArrayList<>();
 
+	public void assignToJournal(Journal journal) {
+		if (journal == null) {
+			throw new BadRequestException("여행일지는 null일 수 없습니다.");
+		}
+		if (this.journal != null && !this.journal.equals(journal)) {
+			throw new BadRequestException("이미 다른 여행일지에 할당된 일차입니다.");
+		}
+		this.journal = journal;
+	}
+
+	public void removeFromJournal() {
+		this.journal = null;
+	}
+
 	public void addPhoto(Photo photo) {
+		if (photo == null) {
+			throw new IllegalArgumentException("사진은 null일 수 없습니다.");
+		}
 		this.photos.add(photo);
 		photo.assignJournalDay(this);
+	}
+
+	public void removePhoto(Photo photo) {
+		if (photo != null) {
+			this.photos.remove(photo);
+			photo.removeFromJournalDay();
+		}
+	}
+
+	public static JournalDay createForJournal(Journal journal, int dayNumber, String description) {
+		if (journal == null) {
+			throw new IllegalArgumentException("여행일지는 null일 수 없습니다.");
+		}
+
+		JournalDay journalDay = JournalDay.builder()
+			.dayNumber(dayNumber)
+			.description(description != null ? description.trim() : null)
+			.build();
+
+		journalDay.assignToJournal(journal);
+		return journalDay;
 	}
 }

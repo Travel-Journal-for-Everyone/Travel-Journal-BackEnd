@@ -133,4 +133,7 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
         WHERE jd.journal_id = :journalId
         """, nativeQuery = true)
 	void deleteImageInfoByJournalId(@Param("journalId") Long journalId);
+
+	@Query("SELECT j.id FROM Journal j WHERE j.id IN :journalIds")
+	List<Long> findExistingIds(@Param("journalIds") List<Long> journalIds);
 }

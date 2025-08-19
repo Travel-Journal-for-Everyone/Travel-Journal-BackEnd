@@ -339,4 +339,11 @@ public class JournalService {
 
 		return journal;
 	}
+
+	@Transactional(readOnly = true)
+	public Journal findById(Long journalId) {
+		return journalRepository.findById(journalId)
+			.orElseThrow(() -> new JournalNotFoundException("여행일지를 찾을 수 없습니다. ID: " + journalId));
+	}
+
 }

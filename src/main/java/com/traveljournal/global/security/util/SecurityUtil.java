@@ -24,4 +24,12 @@ public class SecurityUtil {
 		}
 		return userDetails.getMemberId();
 	}
+
+	public static Long getCurrentMemberIdOrNull() {
+		try {
+			return getCurrentMemberId();
+		} catch (Exception e) {
+			return null;
+		}
+	}
 }

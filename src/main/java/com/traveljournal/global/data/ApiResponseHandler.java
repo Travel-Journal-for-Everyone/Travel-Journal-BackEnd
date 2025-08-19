@@ -19,6 +19,10 @@ public class ApiResponseHandler<T>{
 		return ResponseEntity.status(HttpStatus.CREATED).body(message);
 	}
 
+	public static <T> ResponseEntity<T> createdSuccess(T object) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(object);
+	}
+
 	public static ResponseEntity<?> onSuccess(String message) {
 		return ResponseEntity.ok(message);
 	}
@@ -29,6 +33,10 @@ public class ApiResponseHandler<T>{
 
 	public static ResponseEntity<?> updatedSuccess(String message) {
 		return ResponseEntity.ok(message);
+	}
+
+	public static <T> ResponseEntity<T> updatedSuccess(T object) {
+		return ResponseEntity.ok(object);
 	}
 
 	public static <T> ResponseEntity<T> getObjectSuccess(T object) {
